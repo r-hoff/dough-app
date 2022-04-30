@@ -1,5 +1,8 @@
 <script>
+	import Swal from 'sweetalert2';
+	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
+	import { ingredientsW, servingsW, recipeW, tooltipModeW, advancedModeW, showWelcomeMessageW } from './stores';
 	import FaChevronUp from 'svelte-icons/fa/FaChevronUp.svelte'
 	import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
 	import FaChevronLeft from 'svelte-icons/fa/FaChevronLeft.svelte'
@@ -8,43 +11,48 @@
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
 	import FaSave from 'svelte-icons/fa/FaSave.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
+	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
 
-	let servings = 1;
+	let servings;
+	servingsW.subscribe(value => {
+		servings = value;
+	});
 
-	let ingredients = {
-		Flour: {base: 250, measurement: 250, percentage: 1},
-		Water: {base: 175, measurement: 175, percentage: .7},
-		Yeast: {base: 0.5, measurement: 0.5, percentage: .002},
-		Salt: {base: 6, measurement: 6, percentage: .024},
-	}
+	let ingredients;
+	ingredientsW.subscribe(value => {
+		ingredients = value;
+	});
 
-	let total;
-	function calcTotal() {
-		const ingredientList = Object.keys(ingredients);
-		total = 0;
-		for (const ingredient of ingredientList) {
-			total += ingredients[ingredient].measurement;
-		}
-	}
-	calcTotal();
+	let recipe;
+	recipeW.subscribe(value => {
+		recipe = value;
+	});
 
-	let recipe = {pt1: "1. Heat Water to ~100°F (38°C). Dissolve Salt in Water, then stir in Yeast. Let sit for a minute or two.",
-		pt2: "2. Measure Flour into bowl of stand mixer. Add in the Water/Yeast/Salt mixture and stir with a spatula until just combined. "
-		+ "Then, mix on low for 3-5 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
-		pt3: "3. After resting, mix dough on low again for 30 seconds. Then, lightly oil another large bowl and transfer the dough ball. "
-		+ "Cover with a lid or plastic wrap and let proof for 2 hours at room temperature.",
-		pt4_1: "4. Turn out dough onto surface. Cut and shape into equal sized balls ",
-		pt4_2: "and place into a large tupperware or on individual dinner plates. Cover and place in refrigerator for 12-24 hours.",
-		pt5: "5. Remove dough from refrigerator 30-60 minutes before making pizza. Then stretch, top, and bake!"}
+	let showWelcomeMessage;
+	showWelcomeMessageW.subscribe(value => {
+		showWelcomeMessage = value;
+	});
+
+	let tooltipMode;
+	tooltipModeW.subscribe(value => {
+		tooltipMode = value;
+	});
+
+	let advancedMode;
+	advancedModeW.subscribe(value => {
+		advancedMode = value;
+	});
 
 	function incServings() {
-		servings += 1;
+		servingsW.update(value => value + 1);
+		// servings += 1;
 		recalcIngredients();
 	}
 
 	function decServings() {
 		if (servings > 1) {
-			servings -= 1;
+			servingsW.update(value => value - 1);
+			// servings -= 1;
 			recalcIngredients();
 		}
 	}
@@ -60,7 +68,6 @@
 				ingredients.Flour.measurement = ingredients.Flour.base * servings;
 			}
 		}
-		calcTotal();
 	}
 
 	function decIngredientPercentage(ingredient) {
@@ -92,74 +99,190 @@
 			recalcIngredients();
 		}
 	}
-
-	let metric = true;
-	let metricDisplay = "metric";
-	let metricSlider = "sliderOn";
-	let advanced = false;
-	let advancedDisplay = "advanced";
-	let advancedSlider = "sliderOn";
-
+	
 	let recipeEdit = false;
-
-	function setMetric() {
-		metric = !metric;
-		metricSlider === "sliderOn"? metricSlider = "sliderOff": metricSlider = "sliderOn";
-		metricDisplay === "metricActive"? metricDisplay = "metric": metricDisplay = "metricActive";
-	}
-
-	function setAdvanced() {
-		advanced = !advanced;
-		advancedSlider === "sliderOn"? advancedSlider = "sliderOff": advancedSlider = "sliderOn";
-		advancedDisplay === "advancedActive"? advancedDisplay = "advanced": advancedDisplay = "advancedActive";
-	}
-
+	let preEdit = {};
 	function setRecipeEdit() {
+		preEdit = Object.assign(preEdit, recipe)
 		recipeEdit = !recipeEdit;
 	}
 
+	function saveRecipeEdit() {
+		// make changes
+		recipeEdit = !recipeEdit;
+		recipeW.set({
+			pt1: recipe.pt1,
+			pt2: recipe.pt2,
+			pt3: recipe.pt3,
+			pt4: recipe.pt4,
+			pt5: recipe.pt5,
+		});
+
+		Swal.fire({
+			title: "Success!",
+			icon: 'success',
+			text: "Edits were applied.",
+		});
+	}
+
+	function exitRecipeEdit() {
+		Swal.fire({
+			title: "Cancel Edit Instructions",
+			icon: 'question',
+			text: "Any changes made will be lost. Would you like to continue?",
+			showCancelButton: true,
+			cancelButtonText: "No",
+			confirmButtonText: "Yes"
+		}).then((result) => {
+			if (result.isConfirmed) {
+				recipeW.set({
+					pt1: preEdit.pt1,
+					pt2: preEdit.pt2,
+					pt3: preEdit.pt3,
+					pt4: preEdit.pt4,
+					pt5: preEdit.pt5,
+				});
+				recipeEdit = !recipeEdit;
+			}
+		})
+	}
+
 	function resetDefaultValues() {
-		ingredients = {
-			Flour: {base: 250, measurement: 250, percentage: 1},
-			Water: {base: 175, measurement: 175, percentage: .7},
-			Yeast: {base: 0.5, measurement: 0.5, percentage: .002},
-			Salt: {base: 6, measurement: 6, percentage: .024},
-		}
-		recalcIngredients();
+		Swal.fire({
+				title: "Reset to Default",
+				icon: 'question',
+				text: "All ingredients, percentages, servings, and recipe content will be reset. Would you like to continue?",
+				showCancelButton: true,
+				confirmButtonText: "Yes",
+				cancelButtonText: "No"
+		}).then((result) => {
+			if (result.isConfirmed) {
+				Swal.fire({
+				title: 'Success!',
+				text: 'Default values were restored.',
+				icon: 'success'
+				})
+				servingsW.set(1);
+				ingredientsW.set({
+					Flour: {base: 250, measurement: 250, percentage: 1},
+					Water: {base: 175, measurement: 175, percentage: .7},
+					Yeast: {base: 0.5, measurement: 0.5, percentage: .002},
+					Salt: {base: 6, measurement: 6, percentage: .024},
+				});
+				recipeW.set({
+					pt1: "1. Heat Water to ~100°F (38°C). Dissolve Salt in Water, then stir in Yeast. Let sit for a minute or two.",
+					pt2: "2. Measure Flour into bowl of stand mixer. Add in the Water/Yeast/Salt mixture and stir with a spatula until just combined. "
+						+ "Then, mix on low for 3-5 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
+					pt3: "3. After resting, mix dough on low again for 30 seconds. Then, lightly oil another large bowl and transfer the dough ball. "
+						+ "Cover with a lid or plastic wrap and let proof for 2 hours at room temperature.",
+					pt4: "4. Turn out dough onto surface. Cut and shape into equal sized balls and place into a large tupperware or "
+						+ "on individual dinner plates. Cover and place in refrigerator for 12-24 hours.",
+					pt5: "5. Remove dough from refrigerator 30-60 minutes before making pizza. Then stretch, top, and bake!"
+				});
+				recalcIngredients();
+			}
+		});
 	}
 
 	function routeToPrint() {
-		goto('/print', { replace: false }) 
+		if (recipeEdit || addMode) {
+			Swal.fire({
+				title: "Edits In Progress",
+				icon: 'question',
+				text: "Edits are currently being made. If you navigate to print preview, these changes will be lost. Would you like to continue?",
+				showCancelButton: true,
+				confirmButtonText: "Yes",
+				cancelButtonText: "No"
+			}).then((result) => {
+				if (result.isConfirmed) {
+					if (recipeEdit) {
+						recipeW.set({
+							pt1: preEdit.pt1,
+							pt2: preEdit.pt2,
+							pt3: preEdit.pt3,
+							pt4: preEdit.pt4,
+							pt5: preEdit.pt5,
+						});
+					}
+					goto('/print');
+				}
+			})
+		} else {
+			goto('/print');
+		}
 	}
 
 	let addMode = false;
+	let newIngredientName = null;
+	let newIngredientMeasurement = null;
 	function setAddMode() {
 		newIngredientName = null;
 		newIngredientMeasurement = null;
 		addMode = !addMode;
 	}
 
-	let newIngredientName = null;
-	let newIngredientMeasurement = null;
-
 	function saveIngredient(name, measurement) {
-		if (!name || !measurement) {
-			addMode = !addMode;
-			return;
+		if (!name) {
+			Swal.fire({
+				title: "Add Ingredient Error",
+				icon: 'warning',
+				text: "Ingredient name must not be empty"
+			});
+			return
 		}
+		if (measurement <= 0) {
+			Swal.fire({
+				title: "Add Ingredient Error",
+				icon: 'warning',
+				text: "Ingredient measurement must be greater than zero"
+			});
+			return
+		}
+
 		ingredients[name] = {base: measurement / servings, measurement: measurement, percentage: measurement / ingredients.Flour.measurement};
 		addMode = !addMode;
 		newIngredientName = null;
 		newIngredientMeasurement = null;
-		calcTotal();
+
+		Swal.fire({
+				title: "Success!",
+				icon: 'success',
+				text: "Ingredient: " + name + " was added."
+			});
 	}
 
-	let tooltipMode = false;
-	let showWelcomeMessage = true;
-	function dismissWelcome() {
-		showWelcomeMessage = false;
+	function exitAddMode() {
+		Swal.fire({
+				title: "Cancel Add Ingredient",
+				icon: 'question',
+				text: "The current ingredient will not be added. Would you like to continue?",
+				showCancelButton: true,
+				cancelButtonText: "No",
+				confirmButtonText: "Yes",
+			}).then((result) => {
+				if (result.isConfirmed) {
+					addMode = !addMode;
+					newIngredientName = null;
+					newIngredientMeasurement = null;
+				}
+			})
 	}
-	
+
+	function dismissWelcome() {
+		showWelcomeMessageW.update(value => !value);
+		// showWelcomeMessage = false;
+	}
+
+	function toggleTooltipMode() {
+		tooltipModeW.update(value => !value);
+		// showWelcomeMessage = false;
+	}
+
+	function toggleAdvancedMode() {
+		advancedModeW.update(value => !value);
+		// showWelcomeMessage = false;
+	}
+
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
 <div class="container">
@@ -169,12 +292,12 @@
 			<div class="marginBottom">
 				<b>Welcome to Pizza Dough Planner v1.0!</b><br>
 				This is the official first release of the application. Bugs are expected—don't let them keep you from exploring!<br>
-				Pizza dough calculations are made based on number of servings, which can be adusted with the up/down arrows below.<br>
+				Pizza dough calculations are made based on number of servings, which can be adjusted with the up/down arrows below.<br>
 				Options are available, but some are either not implemented or incomplete, so please approach with an open mind.<br>
 				Please send comments, questions, or concerns: <a href="mailto:hoffr@oregonstate.edu">hoffr@oregonstate.edu</a>. Thanks for using Pizza Dough Planner!
 			</div>
 			<div class="tooltipArrowAbove">
-				<button class="transparentButton icon" on:click={dismissWelcome}><FaTimes /></button>
+				<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
 				{#if !tooltipMode}
 					<div class="tooltiptextArrowAbove">
 						Dismiss this message.
@@ -230,7 +353,7 @@
 				<div class="column centerText">
 					<u>Percentage</u>
 					<div class="row">
-						{#if advanced}
+						{#if advancedMode}
 							<div class="column">
 								{#each Object.entries(ingredients) as [name, details]}
 									{#if name === "Flour"}
@@ -261,7 +384,7 @@
 								{/if}
 							{/each}
 						</div>
-						{#if advanced}
+						{#if advancedMode}
 						<div class="column">
 							{#each Object.entries(ingredients) as [name, details]}
 								{#if name === "Flour"}
@@ -287,32 +410,39 @@
 					</div>
 				</div>
 			</div>
-			{#if advanced}
+			{#if advancedMode}
 				{#if addMode}
-					<div class="spaceBetween">
-						<br>
+				<br>
+					<div class="spaceBetween recipeEdit">
 						<div class="row spaceBetween">
 							<div class="tooltip">
 								<b>Add New Ingredient</b>
 								{#if !tooltipMode}
 									<div class="tooltiptext">
 										<u>Add New Ingredient</u><br>
-										<b>Caution: This feature is still in development!</b><br>
-										If any bugs are encountered, reload the page. Any changes will be lost.<br><br>
 										To add a new ingredient, fill out the name and measurement inputs below.
 									</div>
 								{/if}
 							</div>
-							<div class="tooltipArrowAbove">
-								<button class="transparentButton icon" on:click={() => saveIngredient(newIngredientName, newIngredientMeasurement)}><FaSave /></button>
-								{#if !tooltipMode}
-									<div class="tooltiptextArrowAbove">
-										<u>Save Ingredient</u><br>
-										<b>Caution: This feature is still in development!</b><br>
-										If any bugs are encountered, reload the page. Any changes will be lost.<br><br>
-										Click to save the new ingredient. If either the name or measurement are missing, the ingredient will not be added.
-									</div>
-								{/if}
+							<div>
+								<div class="tooltipArrowAbove">
+									<button class="transparentButton icon" on:click={() => saveIngredient(newIngredientName, newIngredientMeasurement)}><FaSave /></button>
+									{#if !tooltipMode}
+										<div class="tooltiptextArrowAbove">
+											<u>Save Ingredient</u><br>
+											Click to save the new ingredient.
+										</div>
+									{/if}
+								</div>
+								<div class="tooltipArrowAbove">
+									<button class="transparentButton icon red" on:click={exitAddMode}><FaRegWindowClose /></button>
+									{#if !tooltipMode}
+										<div class="tooltiptextArrowAbove">
+											<u>Cancel</u><br>
+											Click to cancel adding a new ingredient.
+										</div>
+									{/if}
+								</div>
 							</div>
 						</div>
 						<div class="row">
@@ -322,20 +452,18 @@
 							</div>
 							<div class="column widthAll">
 								<input id="ingredientName" type="text" placeholder="Ex: Honey" bind:value={newIngredientName}>
-								<input id="ingredientName" type="number" placeholder="in grams" bind:value={newIngredientMeasurement}>
+								<input id="ingredientName" type="number" min=0.1 placeholder="in grams" bind:value={newIngredientMeasurement}>
 							</div>
 						</div>
 					</div>
 				{/if}
 				{#if !addMode}
 					<div class="tooltipSmall">
-						<div class="row"><button class="transparentButton iconSmall" on:click={setAddMode}><FaPlus /></button>Add Ingredient</div>
+						<div class="row alignCenter"><button class="transparentButton icon green" on:click={setAddMode}><FaPlus /></button>Add Ingredient</div>
 						{#if !tooltipMode}
 							<div class="tooltiptextSmall">
 								<u>Add Ingredient</u><br>
-								<b>Caution: This feature is still in development!</b><br>
-								If any bugs are encountered, reload the page. Any changes will be lost.<br><br>
-								Click the "+" to add a new ingredient.
+								Click + to add a new ingredient.
 							</div>
 						{/if}
 					</div>
@@ -348,35 +476,20 @@
 		<div class="column widthAll">
 			<h3 class="centerText setMargin">Options</h3>
 			<div class="column options">
-				<br>
-				<div class="row center">
-					<div class="tooltip">
-						<label for="tooltipMode">Disable tooltips:</label>
-						<input id="tooltipMode" type="checkbox" bind:checked="{tooltipMode}">
-						{#if !tooltipMode}
-							<div class="tooltiptext">
-								<u>Disable tooltips</u><br>
-								Already know your way around the application? Disable tooltips by checking this option.
-							</div>
-						{/if}
-					</div>
-				</div>
 				<div class="row spaceEvenly options">
 					<div class="marginAuto">
 						<br>
 						<div class="tooltip">
-							<div>Use Cups/Tsp:</div>
+							<div>Disable tooltips:</div>
 							{#if !tooltipMode}
 								<div class="tooltiptext">
-									<u>Use Cups/Tsp</u><br>
-									<b>Caution: This feature has not been implemented!</b><br>
-									In future releases, you will be able to convert
-									ingredient measurements from grams to cups/tsp.
+									<u>Disable tooltips</u><br>
+									Already know your way around the application? Disable tooltips by checking this option.
 								</div>
 							{/if}
 						</div>
-						<div class="{metricSlider} marginAuto">
-							<button class="{metricDisplay}" on:click={setMetric}>{metric? "OFF": "ON"}</button>
+						<div class="{tooltipMode? "sliderOff": "sliderOn"} marginAuto">
+							<button class="{tooltipMode? "sliderActive": "sliderNotActive"}" on:click={toggleTooltipMode}>{tooltipMode? "ON": "OFF"}</button>
 						</div>
 						<br>
 					</div>
@@ -387,15 +500,13 @@
 							{#if !tooltipMode}
 								<div class="tooltiptext">
 									<u>Pizzaiolo Mode</u><br>
-									<b>Caution: This feature is still in development!</b><br>
-									If any bugs are encountered, use the "Reset to Default" button below or reload the page. Any changes will be lost.<br><br>
-									This is an advanced mode intended for dough enthusiasts looking to change up and/or refine their recipe to achieve
+									An advanced mode intended for dough enthusiasts looking to change up and/or refine their recipe to achieve
 									that perfect pie. If this sounds like too much, don't worry; our base recipe will still impress your friends and family!
 								</div>
 							{/if}
 						</div>
-						<div class="{advancedSlider} marginAuto">
-							<button class="{advancedDisplay}" on:click={setAdvanced}>{advanced? "ON": "OFF"}</button>
+						<div class="{advancedMode? "sliderOff": "sliderOn"} marginAuto">
+							<button class="{advancedMode? "sliderActive": "sliderNotActive"}" on:click={toggleAdvancedMode}>{advancedMode? "ON": "OFF"}</button>
 						</div>
 						<br>
 					</div>
@@ -410,65 +521,81 @@
 	<div class="column">
 		<div class="row spaceBetween">
 			<h4>Step-by-step Pizza Dough Instructions:</h4>
-			{#if advanced}
+			{#if advancedMode}
 				{#if !recipeEdit}
 					<div class="tooltipArrowAbove">
 						<button class="transparentButton icon" on:click={setRecipeEdit}><FaEdit /></button>
 						{#if !tooltipMode}
 							<div class="tooltiptextArrowAbove">
-								<u>Edit Recipe</u><br>
-								<b>Caution: This feature is still in development!</b><br>
-								If any bugs are encountered, reload the page. Any changes will be lost.<br><br>
-								If you'd like to make any changes to the recipe, click this edit button. After your changes are made, click save.
+								<u>Edit Instructions</u><br>
+								Make changes to the recipe instructions.
 							</div>
 						{/if}
 					</div>
 				{/if}
 				{#if recipeEdit}
-					<div class="tooltipArrowAbove">
-						<button class="transparentButton icon" on:click={setRecipeEdit}><FaSave /></button>
-						{#if !tooltipMode}
-							<div class="tooltiptextArrowAbove">
-								<u>Save Recipe Edit</u><br>
-								<b>Caution: This feature is still in development!</b><br>
-								If any bugs are encountered, reload the page. Any changes will be lost.<br><br>
-								Click save to finalize your edits.
-							</div>
-						{/if}
+					<div>
+						<div class="tooltipArrowAbove">
+							<button class="transparentButton icon" on:click={saveRecipeEdit}><FaSave /></button>
+							{#if !tooltipMode}
+								<div class="tooltiptextArrowAbove">
+									<u>Save Instructions</u><br>
+									Save edits made to the instructions.
+								</div>
+							{/if}
+						</div>
+						<div class="tooltipArrowAbove">
+							<button class="transparentButton icon red" on:click={exitRecipeEdit}><FaRegWindowClose /></button>
+							{#if !tooltipMode}
+								<div class="tooltiptextArrowAbove">
+									<u>Cancel Instruction Edit</u><br>
+									Click to cancel editing recipe.
+								</div>
+							{/if}
+						</div>
 					</div>
 				{/if}
 			{/if}
 		</div>
-		<p contenteditable="{recipeEdit}">
-			{recipe.pt1}<br><br>
-			{recipe.pt2}<br><br>
-			{recipe.pt3}<br><br>
-			{recipe.pt4_1}(roughly {(Math.round((total) / servings))} g each) {recipe.pt4_2}<br><br>
-			{recipe.pt5}
-		</p>
+		{#if recipeEdit}
+			<div class="column recipeEdit">
+				<div contenteditable="true" bind:innerHTML={recipe.pt1}></div><br>
+				<div contenteditable="true" bind:innerHTML={recipe.pt2}></div><br>
+				<div contenteditable="true" bind:innerHTML={recipe.pt3}></div><br>
+				<div contenteditable="true" bind:innerHTML={recipe.pt4}></div><br>
+				<div contenteditable="true" bind:innerHTML={recipe.pt5}></div>
+			</div>
+		{/if}
+		{#if !recipeEdit}
+			<div class="column recipe">
+				<div>{recipe.pt1}<br><br></div>
+				<div>{recipe.pt2}<br><br></div>
+				<div>{recipe.pt3}<br><br></div>
+				<div>{recipe.pt4}<br><br></div>
+				<div>{recipe.pt5}</div>
+			</div>
+		{/if}
 	</div>
 	<br>
 	<div class="row">
 		<div class="widthAll centerText">
 			<div class="tooltip">
-				<button class="printReset" on:click={resetDefaultValues}>Reset to Default</button>
+				<button class="styledButton" on:click={resetDefaultValues}>Reset to Default</button>
 				{#if !tooltipMode}
 					<div class="tooltiptext">
 						<u>Reset to Default</u><br>
-						This will reset all ingredients, measurements, and percentages to their default values.
+						Reset all ingredients, measurements, and percentages to their default values.
 					</div>
 				{/if}
 			</div>
 		</div>
 		<div class="widthAll centerText">
 			<div class="tooltip">
-				<button class="printReset">Print Recipe</button>
+				<button class="styledButton" on:click={routeToPrint}>Print Preview</button>
 				{#if !tooltipMode}
 					<div class="tooltiptext">
-						<u>Print Recipe</u><br>
-						<b>Caution: This feature has not been implemented!</b><br>
-						In future releases, you will be able print a neatly formatted
-						document with all ingredient measurements and instructions.
+						<u>Print Preview</u><br>
+						Prepare a neatly formatted document with all ingredient measurements and instructions.
 					</div>
 				{/if}
 			</div>
@@ -488,9 +615,6 @@
 		height: 100%;
 		margin: auto;
 	}
-	.rightText {
-		text-align: right;
-	}
 	.centerText {
 		text-align: center;
 	}
@@ -508,11 +632,11 @@
 		align-items: center;
 		justify-content: center;
 	}
+	.alignCenter {
+		align-items: center;
+	}
 	.widthAll {
 		width: 100%;
-	}
-	.heightAll {
-		height: 100%;
 	}
 	.pad {
 		padding: 3em;
@@ -522,9 +646,6 @@
 	}
 	.marginAuto {
 		margin: auto;
-	}
-	.flexEnd {
-		justify-content: flex-end;
 	}
 	hr {
 		width: 100%;
@@ -549,14 +670,40 @@
 		background-color: #EEEEEE;
 		border-radius: 12px;
 	}
-
+	.recipe {
+		border: 1px ;
+		border-style: solid;
+		border-color: transparent;
+		padding: .25em;
+	}
+	.recipeEdit {
+		border: 1px ;
+		border-style: solid;
+		background-color: #E8EAF6;
+		border-color: #757575;
+		border-radius: 6px;
+		padding: .25em;
+	}
+	.red {
+		color: #F44336;
+	}
+	.green {
+		color: #4CAF50;
+	}
 	.icon {
 		width: 28px;
 		height: 28px;
 	}
+	.icon:hover {
+		/* box-shadow: 0 0.2em 0.2em -0.2em var(--hover); */
+		transform: translateY(-0.1em);
+	}
 	.iconSmall {
 		width: 20px;
 		height: 20px;
+	}
+	.iconSmall:hover {
+		transform: translateY(-0.1em);
 	}
 	button {
 		cursor: pointer;
@@ -577,26 +724,13 @@
 		background-color: #BDBDBD;
 		border-radius: 12px;
 	}
-	.metricActive {
+	.sliderActive {
 		font-weight: bold;
 		background-color: white;
 		border-color: #283593;
 		border-radius: 12px;
 	}
-	.metric {
-		font-weight: bold;
-		color: #757575;
-		background-color: white;
-		border-color: #BDBDBD;
-		border-radius: 12px;
-	}
-	.advancedActive {
-		font-weight: bold;
-		background-color: white;
-		border-color: #283593;
-		border-radius: 12px;
-	}
-	.advanced {
+	.sliderNotActive {
 		font-weight: bold;
 		color: #757575;
 		background-color: white;
@@ -618,7 +752,7 @@
 		-webkit-appearance: none;
 		margin: 0;
 	}
-	.printReset {
+	.styledButton {
 		width: 10em;
 		border: 0;
 		background-color: #303F9F;
@@ -626,12 +760,13 @@
         border-radius: 6px;
         padding: 8px 12px;
         font-weight: bold;
-        box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
 	}
-	.printReset:hover {
+	.styledButton:hover {
 		background-color: #283593;
+		-webkit-box-shadow: 0px 0px 10px 5px rgba(61,61,61,0.3); 
+		box-shadow: 0px 0px 10px 5px rgba(61,61,61,0.3);
 	}
-	.printReset:active {
+	.styledButton:active {
 		background-color: #1A237E;
 	}
 
