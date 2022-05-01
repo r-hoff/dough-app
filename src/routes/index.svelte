@@ -447,12 +447,12 @@
 								</div>
 							</div>
 						</div>
-						<div class="row">
-							<div class="column widthAll">
+						<div class="row spaceEvenly">
+							<div class="column widthAll spaceBetween">
 								<label for="ingredientName">Ingredient name:</label>
 								<label for="ingredientMeasurement">Measurement:</label>
 							</div>
-							<div class="column widthAll">
+							<div class="column widthAll spaceBetween">
 								<input id="ingredientName" type="text" placeholder="Ex: Honey" bind:value={newIngredientName}>
 								<input id="ingredientName" type="number" min=0.1 placeholder="in grams" bind:value={newIngredientMeasurement}>
 							</div>
@@ -637,11 +637,6 @@
 	.addIngredient {
 		padding-top: 1em;
 	}
-	.pad {
-		padding: 5%;
-		max-width: 50%;
-		min-width: 50%;
-	}
 	.options {
 		background-color: #EEEEEE;
 		border-radius: 12px;
@@ -771,6 +766,7 @@
 		text-align: center; 
 	}
 	input {
+		width: 90%;
 		border: none;
 		border-bottom: 1px solid #BDBDBD;
 	}
