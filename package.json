@@ -17,7 +17,9 @@
 	"type": "module",
 	"dependencies": {
 		"page": "^1.11.6",
-		"svelte-icons": "^2.1.0",
+		"svelte-icons": "^2.1.0"
+	},
+	"optionalDependencies": {
 		"sweetalert2": "^11.4.10"
 	}
 }
