@@ -128,7 +128,7 @@
 	function exitRecipeEdit() {
 		Swal.fire({
 			title: "Cancel Edit Instructions",
-			icon: 'question',
+			icon: 'warning',
 			text: "Any changes made will be lost. Would you like to continue?",
 			showCancelButton: true,
 			cancelButtonText: "No",
@@ -150,17 +150,16 @@
 	function resetDefaultValues() {
 		Swal.fire({
 				title: "Reset to Default",
-				icon: 'question',
+				icon: 'warning',
 				text: "All ingredients, percentages, servings, and recipe content will be reset. Would you like to continue?",
 				showCancelButton: true,
 				confirmButtonText: "Yes",
 				cancelButtonText: "No"
 		}).then((result) => {
 			if (result.isConfirmed) {
-				Swal.fire({
-				title: 'Success!',
-				text: 'Default values were restored.',
-				icon: 'success'
+				Toast.fire({
+					icon: 'success',
+					title: `Default values were restored successfully!`
 				})
 				servingsW.set(1);
 				ingredientsW.set({
@@ -185,10 +184,10 @@
 	}
 
 	function routeToPrint() {
-		if (recipeEdit || addMode) {
+		if (recipeEdit) {
 			Swal.fire({
 				title: "Edits In Progress",
-				icon: 'question',
+				icon: 'warning',
 				text: "Edits are currently being made. If you navigate to print preview, these changes will be lost. Would you like to continue?",
 				showCancelButton: true,
 				confirmButtonText: "Yes",
@@ -212,80 +211,117 @@
 		}
 	}
 
-	let addMode = false;
-	let newIngredientName = null;
-	let newIngredientMeasurement = null;
-	function setAddMode() {
-		newIngredientName = null;
-		newIngredientMeasurement = null;
-		addMode = !addMode;
-	}
-
-	function saveIngredient(name, measurement) {
-		if (!name) {
-			Swal.fire({
-				title: "Add Ingredient Error",
-				icon: 'warning',
-				text: "Ingredient name must not be empty"
-			});
-			return
-		}
-		if (measurement <= 0) {
-			Swal.fire({
-				title: "Add Ingredient Error",
-				icon: 'warning',
-				text: "Ingredient measurement must be greater than zero"
-			});
-			return
-		}
-
-		ingredients[name] = {base: measurement / servings, measurement: measurement, percentage: measurement / ingredients.Flour.measurement};
-		addMode = !addMode;
-		newIngredientName = null;
-		newIngredientMeasurement = null;
-
+	function addIngredient() {
 		Swal.fire({
-				title: "Success!",
-				icon: 'success',
-				text: "Ingredient: " + name + " was added."
-			});
-	}
-
-	function exitAddMode() {
-		Swal.fire({
-				title: "Cancel Add Ingredient",
-				icon: 'question',
-				text: "The current ingredient will not be added. Would you like to continue?",
-				showCancelButton: true,
-				cancelButtonText: "No",
-				confirmButtonText: "Yes",
-			}).then((result) => {
-				if (result.isConfirmed) {
-					addMode = !addMode;
-					newIngredientName = null;
-					newIngredientMeasurement = null;
+			title: "Add Ingredient",
+			inputLabel: "Enter ingredient name:",
+			input: "text",
+			inputPlaceholder: 'Ex: Honey',
+			inputAttributes: {
+				autocapitalize: 'on'
+			},
+			showCloseButton: true,
+			confirmButtonText: "Continue",
+			inputValidator: (name) => {
+				if (!name) {
+				return 'Please enter an ingredient name'
 				}
-			})
+			}
+		}).then((name) => {
+			if(name.isConfirmed) {
+				Swal.fire({
+					title: "Add Ingredient",
+					inputLabel: "Enter ingredient measurement:",
+					input: "number",
+					inputPlaceholder: 'in grams',
+					showCloseButton: true,
+					confirmButtonText: "Add",
+					inputValidator: (measurement) => {
+						if (measurement <= 0) {
+						return 'Measurement must be greater than zero'
+						}
+					}
+				}).then((measurement) => {
+					if (measurement.isDismissed) {
+						Toast.fire({
+							icon: 'error',
+							title: `Cancelled adding ingedient: ${name.value}`
+						})
+					}
+					if(measurement.isConfirmed) {
+						ingredients[name.value] = {base: measurement / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement};
+						Toast.fire({
+							icon: 'success',
+							title: `${name.value} was added successfully!`
+						})
+					}
+				})
+			}
+		})
 	}
+
+	const Toast = Swal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 2000
+	})
+
+	const ToastCountdown = Swal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: true,
+		confirmButtonText: "Undo",
+		timer: 2000,
+		timerProgressBar: true,
+		reverseButtons: true,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', Swal.stopTimer)
+			toast.addEventListener('mouseleave', Swal.resumeTimer)
+		}
+	})
 
 	function dismissWelcome() {
 		showWelcomeMessageW.update(value => !value);
-		// showWelcomeMessage = false;
+		ToastCountdown.fire({
+			icon: 'info',
+			title: 'Dismissed welcome message'
+		}).then((result) => {
+		if (result.isConfirmed) {
+			showWelcomeMessageW.update(value => !value);
+		}
+	})
+	}
+
+	let mobile = false;
+	function testScreen() {
+		console.log("hello")
+		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
+			mobile = true;
+			tooltipModeW.update(value => true);
+		} else {
+			mobile = false;
+		}
 	}
 
 	function toggleTooltipMode() {
-		tooltipModeW.update(value => !value);
-		// showWelcomeMessage = false;
+		if (mobile) {
+			Toast.fire({
+			icon: 'info',
+			title: 'Tooltips only available on desktop'
+		})
+		} else {
+			tooltipModeW.update(value => !value);
+		}
 	}
 
 	function toggleAdvancedMode() {
 		advancedModeW.update(value => !value);
-		// showWelcomeMessage = false;
 	}
 
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
-<div class="container">
+<div on:mouseenter={testScreen} class="container">
 	<h1 class="widthAll centerText marginAuto title">Pizza Dough Planner</h1>
 	{#if showWelcomeMessage}
 		<div class="row spaceEvenly">
@@ -413,55 +449,8 @@
 				<div class="column"></div>
 			</div>
 			{#if advancedMode}
-				{#if addMode}
-				<br>
-					<div class="spaceBetween recipeEdit">
-						<div class="row spaceBetween">
-							<div class="tooltip">
-								<b>Add New Ingredient</b>
-								{#if !tooltipMode}
-									<div class="tooltiptext">
-										<u>Add New Ingredient</u><br>
-										To add a new ingredient, fill out the name and measurement inputs below.
-									</div>
-								{/if}
-							</div>
-							<div>
-								<div class="tooltipArrowAbove">
-									<button class="transparentButton icon" on:click={() => saveIngredient(newIngredientName, newIngredientMeasurement)}><FaSave /></button>
-									{#if !tooltipMode}
-										<div class="tooltiptextArrowAbove">
-											<u>Save Ingredient</u><br>
-											Click to save the new ingredient.
-										</div>
-									{/if}
-								</div>
-								<div class="tooltipArrowAbove">
-									<button class="transparentButton icon red" on:click={exitAddMode}><FaRegWindowClose /></button>
-									{#if !tooltipMode}
-										<div class="tooltiptextArrowAbove">
-											<u>Cancel</u><br>
-											Click to cancel adding a new ingredient.
-										</div>
-									{/if}
-								</div>
-							</div>
-						</div>
-						<div class="row spaceEvenly">
-							<div class="column widthAll spaceBetween">
-								<label for="ingredientName">Ingredient name:</label>
-								<label for="ingredientMeasurement">Measurement:</label>
-							</div>
-							<div class="column widthAll spaceBetween">
-								<input id="ingredientName" type="text" placeholder="Ex: Honey" bind:value={newIngredientName}>
-								<input id="ingredientName" type="number" min=0.1 placeholder="in grams" bind:value={newIngredientMeasurement}>
-							</div>
-						</div>
-					</div>
-				{/if}
-				{#if !addMode}
 					<div class="tooltipSmall">
-						<div class="row center addIngredient"><button class="transparentButton icon green" on:click={setAddMode}><FaPlus /></button>&nbsp;&nbsp;Add Ingredient</div>
+						<div class="row center addIngredient"><button class="transparentButton icon green" on:click={addIngredient}><FaPlus /></button>&nbsp;&nbsp;Add Ingredient</div>
 						{#if !tooltipMode}
 							<div class="tooltiptextSmall">
 								<u>Add Ingredient</u><br>
@@ -469,7 +458,6 @@
 							</div>
 						{/if}
 					</div>
-				{/if}
 				<br>
 				<div class="centerText lightText">Unsure on how modifying ingredients will affect your dough? <a target="_blank" href="http://www.thehomepizzeria.com/pizza-dough/ingredients/#">Read more here</a></div>
 			{/if}

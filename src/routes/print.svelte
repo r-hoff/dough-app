@@ -118,33 +118,6 @@
 			<div id="pad2" class="pad"></div>
 		</div>
 	</div>
-
-
-	<!-- <h1 class="widthAll centerText marginAuto title">Print Recipe</h1><br>
-	<div>{servings}</div><br>
-
-	{#each Object.entries(ingredients) as [name, details]}
-		<div class="row spaceEvenly">
-			{name}
-			{#if details.measurement % 1 !== 0}
-				<div>{details.measurement.toFixed(2)} g</div>
-			{/if}
-			{#if details.measurement % 1 === 0}
-				<div>{details.measurement.toFixed(0)} g</div>
-			{/if}
-			{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) !== 0}
-				<div>{(details.percentage * 100).toFixed(1)} %</div>
-			{/if}
-			{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) === 0}
-				<div>{(details.percentage * 100).toFixed(0)} %</div>
-			{/if}
-		</div>
-	{/each}
-	<br>
-
-	{#each Object.entries(recipe) as [number, step]}
-		<div>{step}</div>
-	{/each} -->
 </div>
 <style>
 	* {
