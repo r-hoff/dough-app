@@ -1,7 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
     import { ingredientsW, servingsW, recipeW, tooltipModeW } from './stores';
-	import FaRegArrowAltCircleLeft from 'svelte-icons/fa/FaRegArrowAltCircleLeft.svelte'
+	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 
 	let servings;
@@ -42,7 +42,7 @@
 <div class="container">
 	<div id="hide" class="navbar spaceBetween">
 		<div class="tooltipArrowBelow">
-			<button class="transparentButton iconLarge" on:click={routeToHome}><FaRegArrowAltCircleLeft /></button>
+			<button class="transparentButton iconLarge" on:click={routeToHome}><FaArrowLeft /></button>
 			{#if !tooltipMode}
 				<div id="ttBack" class="tooltiptextArrowBelow">
 					Navigate back to planner.
@@ -111,8 +111,8 @@
 			<div id="pad1" class="pad"></div>
 			<div class="column">
 				<h4>Instructions:</h4>
-				{#each Object.entries(recipe) as [number, step]}
-					<div>{step}</div><br>
+				{#each recipe as step, i}
+					<div>{i+1}. {step}<br><br></div>
 				{/each}
 			</div>
 			<div id="pad2" class="pad"></div>

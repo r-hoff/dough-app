@@ -9,9 +9,10 @@
 	import FaChevronRight from 'svelte-icons/fa/FaChevronRight.svelte'
 	import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
-	import FaSave from 'svelte-icons/fa/FaSave.svelte'
+	import FaBan from 'svelte-icons/fa/FaBan.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
 	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
+	import FaRegTimesCircle from 'svelte-icons/fa/FaRegTimesCircle.svelte'
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -45,15 +46,20 @@
 
 	function incServings() {
 		servingsW.update(value => value + 1);
-		// servings += 1;
+
 		recalcIngredients();
 	}
 
 	function decServings() {
 		if (servings > 1) {
 			servingsW.update(value => value - 1);
-			// servings -= 1;
+
 			recalcIngredients();
+		} else {
+			Toast.fire({
+				icon: 'warning',
+				title: 'Minimum number of pizzas is 1'
+			})
 		}
 	}
 
@@ -99,53 +105,56 @@
 			recalcIngredients();
 		}
 	}
+
+	function recipeString() {
+		let recipeString = '';
+		let length = recipe.length - 1;
+		let idx = 0;
+		for (const step of recipe) {
+			if (idx === length) {
+				recipeString += step;
+			} else {
+				recipeString += step + "\n\n";
+			}
+			idx++;
+		}
+		return recipeString;
+	}
 	
-	let recipeEdit = false;
-	let preEdit = {};
-	function setRecipeEdit() {
-		preEdit = Object.assign(preEdit, recipe)
-		recipeEdit = !recipeEdit;
-	}
-
-	function saveRecipeEdit() {
-		// make changes
-		recipeEdit = !recipeEdit;
-		recipeW.set({
-			pt1: recipe.pt1,
-			pt2: recipe.pt2,
-			pt3: recipe.pt3,
-			pt4: recipe.pt4,
-			pt5: recipe.pt5,
-		});
-
+	function editInstructions() {
+		let preEdit = recipeString();
 		Swal.fire({
-			title: "Success!",
-			icon: 'success',
-			text: "Edits were applied.",
-		});
-	}
-
-	function exitRecipeEdit() {
-		Swal.fire({
-			title: "Cancel Edit Instructions",
-			icon: 'warning',
-			text: "Any changes made will be lost. Would you like to continue?",
+			title: "Edit Instructions",
+			text: "Enter instructions below",
+			input: "textarea",
 			showCancelButton: true,
-			cancelButtonText: "No",
-			confirmButtonText: "Yes"
-		}).then((result) => {
-			if (result.isConfirmed) {
-				recipeW.set({
-					pt1: preEdit.pt1,
-					pt2: preEdit.pt2,
-					pt3: preEdit.pt3,
-					pt4: preEdit.pt4,
-					pt5: preEdit.pt5,
-				});
-				recipeEdit = !recipeEdit;
+			cancelButtonText: "Cancel",
+			confirmButtonText: "Save",
+			inputValue: preEdit
+		}).then((edit) => {
+			if (edit.isConfirmed) {
+				if (edit.value !== preEdit) {
+					saveRecipeEdit(edit.value);
+				}
 			}
 		})
+
 	}
+
+	function saveRecipeEdit(edit) {
+		let edits = edit.split("\n\n");
+		console.log(edits.length)
+		if (edits.length <= 1) {
+			recipeW.set([])
+		} else {
+			recipeW.set(edits)
+		}
+		Toast.fire({
+			icon: 'success',
+			title: 'Instructions updated'
+		})
+	}
+
 
 	function resetDefaultValues() {
 		Swal.fire({
@@ -163,52 +172,28 @@
 				})
 				servingsW.set(1);
 				ingredientsW.set({
-					Flour: {base: 250, measurement: 250, percentage: 1},
-					Water: {base: 175, measurement: 175, percentage: .7},
-					Yeast: {base: 0.5, measurement: 0.5, percentage: .002},
-					Salt: {base: 6, measurement: 6, percentage: .024},
+					Flour: {base: 250, measurement: 250, percentage: 1, default: true},
+					Water: {base: 175, measurement: 175, percentage: .7, default: true},
+					Yeast: {base: 0.5, measurement: 0.5, percentage: .002, default: true},
+					Salt: {base: 6, measurement: 6, percentage: .024, default: true},
 				});
-				recipeW.set({
-					pt1: "1. Heat Water to ~100°F (38°C). Dissolve Salt in Water, then stir in Yeast. Let sit for a minute or two.",
-					pt2: "2. Measure Flour into bowl of stand mixer. Add in the Water/Yeast/Salt mixture and stir with a spatula until just combined. "
-						+ "Then, mix on low for 3-5 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
-					pt3: "3. After resting, mix dough on low again for 30 seconds. Then, lightly oil another large bowl and transfer the dough ball. "
-						+ "Cover with a lid or plastic wrap and let proof for 2 hours at room temperature.",
-					pt4: "4. Turn out dough onto surface. Cut and shape into equal sized balls and place into a large tupperware or "
-						+ "on individual dinner plates. Cover and place in refrigerator for 12-24 hours.",
-					pt5: "5. Remove dough from refrigerator 30-60 minutes before making pizza. Then stretch, top, and bake!"
-				});
+				recipeW.set([
+					"Heat Water to ~100°F (38°C). Dissolve Salt in Water, then stir in Yeast. Let sit for a minute or two.",
+					"Measure Flour into bowl of stand mixer. Add in the Water/Yeast/Salt mixture and stir with a spatula until just combined. "
+					+ "Then, mix on low for 3-5 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
+					"After resting, mix dough on low again for 30 seconds. Then, lightly oil another large bowl and transfer the dough ball. "
+					+ "Cover with a lid or plastic wrap and let proof for 2 hours at room temperature.",
+					"Turn out dough onto surface. Cut and shape into equal sized balls and place into a large tupperware or "
+					+ "on individual dinner plates. Cover and place in refrigerator for 12-24 hours.",
+					"Remove dough from refrigerator 30-60 minutes before making pizza. Then stretch, top, and bake!"
+				]);
 				recalcIngredients();
 			}
 		});
 	}
 
 	function routeToPrint() {
-		if (recipeEdit) {
-			Swal.fire({
-				title: "Edits In Progress",
-				icon: 'warning',
-				text: "Edits are currently being made. If you navigate to print preview, these changes will be lost. Would you like to continue?",
-				showCancelButton: true,
-				confirmButtonText: "Yes",
-				cancelButtonText: "No"
-			}).then((result) => {
-				if (result.isConfirmed) {
-					if (recipeEdit) {
-						recipeW.set({
-							pt1: preEdit.pt1,
-							pt2: preEdit.pt2,
-							pt3: preEdit.pt3,
-							pt4: preEdit.pt4,
-							pt5: preEdit.pt5,
-						});
-					}
-					goto('/print');
-				}
-			})
-		} else {
-			goto('/print');
-		}
+		goto('/print');
 	}
 
 	function addIngredient() {
@@ -249,12 +234,33 @@
 						})
 					}
 					if(measurement.isConfirmed) {
-						ingredients[name.value] = {base: measurement / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement};
+						ingredients[name.value] = {base: measurement.value / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement, default: false};
 						Toast.fire({
 							icon: 'success',
 							title: `${name.value} was added successfully!`
 						})
 					}
+				})
+			}
+		})
+	}
+
+	function deleteIngredient(ingredient) {
+		Swal.fire({
+			title: `Delete ${ingredient}`,
+			text: `${ingredient} will be removed. Do you wish to proceed?`,
+			showCancelButton: true,
+			confirmButtonText: "Yes",
+			cancelButtonText: "No"
+		}).then((value) => {
+			if (value.isConfirmed) {
+				// delete ingredient and update ingredients
+				delete ingredients[ingredient];
+				ingredientsW.set(ingredients);
+
+				Toast.fire({
+					icon: "success",
+					title: `Deleted ${ingredient} from ingredients`
 				})
 			}
 		})
@@ -272,6 +278,8 @@
 		position: 'top-end',
 		showConfirmButton: true,
 		confirmButtonText: "Undo",
+		showCancelButton: true,
+		cancelButtonText: "Dismiss",
 		timer: 2000,
 		timerProgressBar: true,
 		reverseButtons: true,
@@ -285,7 +293,7 @@
 		showWelcomeMessageW.update(value => !value);
 		ToastCountdown.fire({
 			icon: 'info',
-			title: 'Dismissed welcome message'
+			title: 'Thanks for using Dough Planner!'
 		}).then((result) => {
 		if (result.isConfirmed) {
 			showWelcomeMessageW.update(value => !value);
@@ -295,7 +303,6 @@
 
 	let mobile = false;
 	function testScreen() {
-		console.log("hello")
 		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
 			mobile = true;
 			tooltipModeW.update(value => true);
@@ -307,21 +314,48 @@
 	function toggleTooltipMode() {
 		if (mobile) {
 			Toast.fire({
-			icon: 'info',
-			title: 'Tooltips only available on desktop'
-		})
+				icon: 'info',
+				title: 'Tooltips only available on desktop'
+			})
 		} else {
-			tooltipModeW.update(value => !value);
+			if (tooltipMode) {
+				tooltipModeW.update(value => !value);
+				Toast.fire({
+					icon: 'info',
+					title: 'Tooltips enabled'
+				});
+			} else {
+				tooltipModeW.update(value => !value);
+				Toast.fire({
+					icon: 'info',
+					title: 'Tooltips disabled'
+				});
+			}
+			
 		}
 	}
 
 	function toggleAdvancedMode() {
-		advancedModeW.update(value => !value);
+		if (advancedMode) {
+			advancedModeW.update(value => !value);
+			Toast.fire({
+				icon: 'info',
+				title: 'Pizzaiolo Mode deactivated'
+			});
+		} else {
+			advancedModeW.update(value => !value);
+			Toast.fire({
+				icon: 'info',
+				title: 'Pizzaiolo Mode activated'
+			});
+		}
+	
 	}
 
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
-<div on:mouseenter={testScreen} class="container">
+<svelte:window on:pointermove|once={testScreen}/>
+<div class="container">
 	<h1 class="widthAll centerText marginAuto title">Pizza Dough Planner</h1>
 	{#if showWelcomeMessage}
 		<div class="row spaceEvenly">
@@ -372,8 +406,23 @@
 				<div class="column"></div>
 				<div class="column centerText">
 					<u>Ingredient</u>
-					{#each Object.entries(ingredients) as [name]}
-						<div>{name}</div>
+					{#each Object.entries(ingredients) as [name, details]}
+						<div class="row center">
+							{#if advancedMode}
+								{#if !details.default}
+									<div class="tooltipArrowAbove">
+										<button class="transparentButton iconMed red" on:click={() =>deleteIngredient(name)}><FaBan /></button>
+										{#if !tooltipMode}
+											<div class="tooltiptextArrowAbove">
+												Remove {name}
+											</div>
+										{/if}
+									</div>
+									<div>&nbsp;</div>
+								{/if}
+							{/if}
+							<div>{name}</div>
+						</div>
 					{/each}
 				</div>
 				<div class="column centerText">
@@ -449,15 +498,18 @@
 				<div class="column"></div>
 			</div>
 			{#if advancedMode}
-					<div class="tooltipSmall">
-						<div class="row center addIngredient"><button class="transparentButton icon green" on:click={addIngredient}><FaPlus /></button>&nbsp;&nbsp;Add Ingredient</div>
+				<div class="row center addIngredient">
+					<div class="tooltipArrowAbove">
+						<button class="transparentButton icon green" on:click={addIngredient}><FaPlus /></button>
 						{#if !tooltipMode}
-							<div class="tooltiptextSmall">
+							<div class="tooltiptextArrowAbove">
 								<u>Add Ingredient</u><br>
 								Click + to add a new ingredient.
 							</div>
 						{/if}
 					</div>
+					&nbsp;&nbsp;Add Ingredient
+				</div>
 				<br>
 				<div class="centerText lightText">Unsure on how modifying ingredients will affect your dough? <a target="_blank" href="http://www.thehomepizzeria.com/pizza-dough/ingredients/#">Read more here</a></div>
 			{/if}
@@ -511,59 +563,22 @@
 		<div class="row spaceBetween">
 			<h4>Step-by-step Pizza Dough Instructions:</h4>
 			{#if advancedMode}
-				{#if !recipeEdit}
-					<div class="tooltipArrowAbove">
-						<button class="transparentButton icon" on:click={setRecipeEdit}><FaEdit /></button>
-						{#if !tooltipMode}
-							<div class="tooltiptextArrowAbove">
-								<u>Edit Instructions</u><br>
-								Make changes to the recipe instructions.
-							</div>
-						{/if}
-					</div>
-				{/if}
-				{#if recipeEdit}
-					<div>
-						<div class="tooltipArrowAbove">
-							<button class="transparentButton icon" on:click={saveRecipeEdit}><FaSave /></button>
-							{#if !tooltipMode}
-								<div class="tooltiptextArrowAbove">
-									<u>Save Instructions</u><br>
-									Save edits made to the instructions.
-								</div>
-							{/if}
+				<div class="tooltipArrowAbove">
+					<button class="transparentButton icon" on:click={editInstructions}><FaEdit /></button>
+					{#if !tooltipMode}
+						<div class="tooltiptextArrowAbove">
+							<u>Edit Instructions</u><br>
+							Make changes to the recipe instructions.
 						</div>
-						<div class="tooltipArrowAbove">
-							<button class="transparentButton icon red" on:click={exitRecipeEdit}><FaRegWindowClose /></button>
-							{#if !tooltipMode}
-								<div class="tooltiptextArrowAbove">
-									<u>Cancel Instruction Edit</u><br>
-									Click to cancel editing recipe.
-								</div>
-							{/if}
-						</div>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			{/if}
 		</div>
-		{#if recipeEdit}
-			<div class="column recipeEdit">
-				<div contenteditable="true" bind:innerHTML={recipe.pt1}></div><br>
-				<div contenteditable="true" bind:innerHTML={recipe.pt2}></div><br>
-				<div contenteditable="true" bind:innerHTML={recipe.pt3}></div><br>
-				<div contenteditable="true" bind:innerHTML={recipe.pt4}></div><br>
-				<div contenteditable="true" bind:innerHTML={recipe.pt5}></div>
-			</div>
-		{/if}
-		{#if !recipeEdit}
-			<div class="column recipe">
-				<div>{recipe.pt1}<br><br></div>
-				<div>{recipe.pt2}<br><br></div>
-				<div>{recipe.pt3}<br><br></div>
-				<div>{recipe.pt4}<br><br></div>
-				<div>{recipe.pt5}</div>
-			</div>
-		{/if}
+		<div class="column recipe">
+			{#each recipe as step, i}
+				<div>{i+1}. {step}<br><br></div>
+			{/each}
+		</div>
 	</div>
 	<br>
 	<div class="row">
@@ -704,7 +719,14 @@
 		padding: 0;
 	}
 	.icon:hover {
-		/* box-shadow: 0 0.2em 0.2em -0.2em var(--hover); */
+		transform: translateY(-0.1em);
+	}
+	.iconMed {
+		width: 16px;
+		height: 16px;
+		padding: 0;
+	}
+	.iconMed:hover {
 		transform: translateY(-0.1em);
 	}
 	.iconSmall {
