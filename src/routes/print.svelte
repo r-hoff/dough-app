@@ -68,15 +68,16 @@
 		{/if}
 		<br>
 		<h3 class="centerText setMargin">Ingredient Summary</h3>
-		<div class="row spaceBetween">
-			<div id="pad1" class="column pad"></div>
-			<div class="column">
+		<div class="row spaceEvenly">
+			<div class="column"></div>
+			<div class="column"></div>
+			<div class="column centerText">
 				<u>Ingredient</u>
 				{#each Object.entries(ingredients) as [name]}
 					<div>{name}</div>
 				{/each}
 			</div>
-			<div class="column">
+			<div class="column centerText">
 				<u>Measurement</u>
 				{#each Object.entries(ingredients) as [name, details]}
 					{#if details.measurement % 1 !== 0}
@@ -102,18 +103,19 @@
 					</div>
 				</div>
 			</div>
-			<div id="pad2" class="column pad"></div>
+			<div class="column"></div>
+			<div class="column"></div>
 		</div>
 		<br>
-		<div class="row">
-			<div id="pad3" class="column pad"></div>
+		<div class="row spaceBetween">
+			<div id="pad1" class="pad"></div>
 			<div class="column">
 				<h4>Instructions:</h4>
 				{#each Object.entries(recipe) as [number, step]}
 					<div>{step}</div><br>
 				{/each}
 			</div>
-			<div id="pad4" class="column pad"></div>
+			<div id="pad2" class="pad"></div>
 		</div>
 	</div>
 
@@ -160,8 +162,8 @@
 		#ttPrint, #ttPrint {
 			visibility: hidden;
 		}
-		#pad1, #pad2, #pad3, #pad4 {
-			padding: 5%;
+		#pad1, #pad2 {
+			padding: 0;
 		}
 		#hide {
 			visibility: hidden;
@@ -175,6 +177,9 @@
 		display: flex;
 		flex-direction: row;
 		width: 60%;
+	}
+	.maxHalf {
+		width: 50%;
 	}
 	.rightText {
 		text-align: right;
@@ -206,8 +211,10 @@
 		height: 100%;
 	}
 	.pad {
-		padding-left: 10%;
-		padding-right: 10%;
+		width: max-content;
+		min-width: 5%;
+		max-width: 25%;
+		flex-shrink: 1;
 	}
 	.title {
 		padding: .5em;
@@ -228,13 +235,15 @@
 	.row {
 		display: flex;
 		flex-direction: row;
-		width: 100%;
 	}
 	.spaceEvenly {
 		justify-content: space-evenly;
 	}
 	.spaceBetween {
 		justify-content: space-between;
+	}
+	.spaceAround {
+		justify-content: space-around;
 	}
 
 	.options {

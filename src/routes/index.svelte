@@ -291,9 +291,9 @@
 		<div class="row spaceEvenly">
 			<div class="marginBottom">
 				<b>Welcome to Pizza Dough Planner v1.0!</b><br>
-				This is the official first release of the application. Bugs are expected—don't let them keep you from exploring!<br>
-				Pizza dough calculations are made based on number of servings, which can be adjusted with the up/down arrows below.<br>
-				Options are available, but some are either not implemented or incomplete, so please approach with an open mind.<br>
+				This is the official first release of the application. Bugs are expected—don't let them keep you from exploring!
+				Pizza dough calculations are made based on number of servings, which can be adjusted with the up/down arrows below.
+				Options are available, but some are either not implemented or incomplete, so please approach with an open mind.
 				Please send comments, questions, or concerns: <a href="mailto:hoffr@oregonstate.edu">hoffr@oregonstate.edu</a>. Thanks for using Pizza Dough Planner!
 			</div>
 			<div class="tooltipArrowAbove">
@@ -329,24 +329,25 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="column widthAll">
+	<div class="row spaceEvenly ingOpContainer">
+		<div class="column ingredientsContainer">
 			<h3 class="centerText setMargin">Ingredient Summary</h3>
 			<div class="row spaceBetween">
-				<div class="column">
+				<div class="column"></div>
+				<div class="column centerText">
 					<u>Ingredient</u>
 					{#each Object.entries(ingredients) as [name]}
 						<div>{name}</div>
 					{/each}
 				</div>
-				<div class="column">
+				<div class="column centerText">
 					<u>Measurement</u>
 					{#each Object.entries(ingredients) as [name, details]}
 						{#if details.measurement % 1 !== 0}
-							<div>{details.measurement.toFixed(2)} g</div>
+							<div>{details.measurement.toFixed(2)}g</div>
 						{/if}
 						{#if details.measurement % 1 === 0}
-							<div>{details.measurement.toFixed(0)} g</div>
+							<div>{details.measurement.toFixed(0)}g</div>
 						{/if}
 					{/each}
 				</div>
@@ -365,7 +366,7 @@
 												<button class="transparentButton iconSmall" on:click={() => decIngredientPercentage(name)}><FaChevronLeft /></button>
 												{#if !tooltipMode}
 													<div class="tooltiptextArrowAbove">
-														Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
+														Decrease {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
 													</div>
 												{/if}
 											</div>
@@ -397,7 +398,7 @@
 												<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
 												{#if !tooltipMode}
 													<div class="tooltiptextArrowAbove">
-														Decrease {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
+														Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
 													</div>
 												{/if}
 											</div>
@@ -409,6 +410,7 @@
 						{/if}
 					</div>
 				</div>
+				<div class="column"></div>
 			</div>
 			{#if advancedMode}
 				{#if addMode}
@@ -459,7 +461,7 @@
 				{/if}
 				{#if !addMode}
 					<div class="tooltipSmall">
-						<div class="row alignCenter"><button class="transparentButton icon green" on:click={setAddMode}><FaPlus /></button>Add Ingredient</div>
+						<div class="row center addIngredient"><button class="transparentButton icon green" on:click={setAddMode}><FaPlus /></button>&nbsp;&nbsp;Add Ingredient</div>
 						{#if !tooltipMode}
 							<div class="tooltiptextSmall">
 								<u>Add Ingredient</u><br>
@@ -472,14 +474,13 @@
 				<div class="centerText lightText">Unsure on how modifying ingredients will affect your dough? <a target="_blank" href="http://www.thehomepizzeria.com/pizza-dough/ingredients/#">Read more here</a></div>
 			{/if}
 		</div>
-		<div class="column pad"></div>
-		<div class="column widthAll">
+		<div class="column optionsContainer">
 			<h3 class="centerText setMargin">Options</h3>
 			<div class="column options">
 				<div class="row spaceEvenly options">
 					<div class="marginAuto">
 						<br>
-						<div class="tooltip">
+						<div class="tooltip centerText">
 							<div>Disable tooltips:</div>
 							{#if !tooltipMode}
 								<div class="tooltiptext">
@@ -495,7 +496,7 @@
 					</div>
 					<div class="marginAuto">
 						<br>
-						<div class="tooltip">
+						<div class="tooltip centerText">
 							<div>Pizzaiolo Mode:</div>
 							{#if !tooltipMode}
 								<div class="tooltiptext">
@@ -615,6 +616,36 @@
 		height: 100%;
 		margin: auto;
 	}
+	.ingOpContainer {
+		flex-wrap: wrap;
+		width: 100%;
+	}
+	.ingredientsContainer {
+		flex-shrink: 1;
+		flex-grow: 1;
+		min-width: 45%;
+		padding-left: 2.5%;
+		padding-right: 2.5%;
+	}
+	.optionsContainer {
+		flex-shrink: 1;
+		flex-grow: 1;
+		min-width: 45%;
+		padding-left: 2.5%;
+		padding-right: 2.5%;
+	}
+	.addIngredient {
+		padding-top: 1em;
+	}
+	.pad {
+		padding: 5%;
+		max-width: 50%;
+		min-width: 50%;
+	}
+	.options {
+		background-color: #EEEEEE;
+		border-radius: 12px;
+	}
 	.centerText {
 		text-align: center;
 	}
@@ -627,6 +658,7 @@
 	}
 	.marginBottom {
 		margin-bottom: .5em;
+		max-width: 80%;
 	}
 	.center {
 		align-items: center;
@@ -638,11 +670,9 @@
 	.widthAll {
 		width: 100%;
 	}
-	.pad {
-		padding: 3em;
-	}
 	.title {
-		padding: .5em;
+		padding-top: .5em;
+		padding-bottom: .5em;
 	}
 	.marginAuto {
 		margin: auto;
@@ -665,11 +695,6 @@
 	.spaceBetween {
 		justify-content: space-between;
 	}
-
-	.options {
-		background-color: #EEEEEE;
-		border-radius: 12px;
-	}
 	.recipe {
 		border: 1px ;
 		border-style: solid;
@@ -691,16 +716,18 @@
 		color: #4CAF50;
 	}
 	.icon {
-		width: 28px;
-		height: 28px;
+		width: 20px;
+		height: 20px;
+		padding: 0;
 	}
 	.icon:hover {
 		/* box-shadow: 0 0.2em 0.2em -0.2em var(--hover); */
 		transform: translateY(-0.1em);
 	}
 	.iconSmall {
-		width: 20px;
-		height: 20px;
+		width: 12px;
+		height: 12px;
+		padding: 0;
 	}
 	.iconSmall:hover {
 		transform: translateY(-0.1em);
