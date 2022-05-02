@@ -6,8 +6,8 @@
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
-	import {toWords} from 'number-to-words/src/index.js'
-
+	import numToWords from 'number-to-words/src/index.js';
+	const { toWords } = numToWords;
 
 	let servings;
 	servingsW.subscribe(value => {
