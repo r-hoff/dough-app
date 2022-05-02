@@ -6,7 +6,7 @@
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
-	import {toWords} from 'number-to-words/src/index'
+	import {toWords} from 'number-to-words/src/index.js'
 
 
 	let servings;
