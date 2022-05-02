@@ -86,33 +86,35 @@
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
 <div class="container">
-	<div id="hide" class="navbar spaceBetween">
-		<div class="tooltipArrowBelow">
-			<button class="transparentButton iconLarge" on:click={routeToHome}><FaArrowLeft /></button>
-			{#if !tooltipMode}
-				<div id="ttBack" class="tooltiptextArrowBelow">
-					Navigate back to planner.
-				</div>
-			{/if}
+	<div class="navbar spaceBetween">
+		<div id="hide" class="navbarContainer spaceBetween">
+			<div class="tooltipArrowBelow">
+				<button class="transparentButton iconLarge" on:click={routeToHome}><FaArrowLeft /></button>
+				{#if !tooltipMode}
+					<div id="ttBack" class="tooltiptextArrowBelow">
+						Navigate back to planner.
+					</div>
+				{/if}
+			</div>
+			<div class="tooltipArrowBelow">
+				<button class="transparentButton iconLarge" on:click={editTitle}><FaEdit /></button>
+				{#if !tooltipMode}
+					<div id="ttEdit" class="tooltiptextArrowBelow">
+						Edit recipe title.
+					</div>
+				{/if}
+			</div>
+			<div class="tooltipArrowBelow">
+				<button class="transparentButton iconLarge" on:click={() => window.print()}><FaPrint /></button>
+				{#if !tooltipMode}
+					<div id="ttPrint" class="tooltiptextArrowBelow">
+						Print recipe!
+					</div>
+				{/if}
+			</div>
 		</div>
-		<div class="tooltipArrowBelow">
-			<button class="transparentButton iconLarge" on:click={editTitle}><FaEdit /></button>
-			{#if !tooltipMode}
-				<div id="ttEdit" class="tooltiptextArrowBelow">
-					Edit recipe title.
-				</div>
-			{/if}
-		</div>
-		<div class="tooltipArrowBelow">
-			<button class="transparentButton iconLarge" on:click={() => window.print()}><FaPrint /></button>
-			{#if !tooltipMode}
-				<div id="ttPrint" class="tooltiptextArrowBelow">
-					Print recipe!
-				</div>
-			{/if}
-		</div>
+		<hr class="hrNav">
 	</div>
-	<hr>
 	<div id="print" class="column">
 		<h1 class="centerText marginAuto title">{recipeTitle}</h1>
 		{#if servings > 1}
@@ -202,6 +204,15 @@
 		}
 	}
 	.navbar {
+		position: -webkit-sticky; /* Safari */
+		position: sticky;
+		top: 0;
+		background-color: white;
+		z-index: 1;
+		width: 100%;
+	}
+	.navbarContainer {
+		margin-top: .5rem;
 		display: flex;
 		flex-direction: row;
 		width: 100%;
@@ -255,6 +266,16 @@
 	}
 	hr {
 		width: 100%;
+		height: 1px;
+		border: none;
+		background-color: #616161;
+	}
+	.hrNav {
+		margin: 0;
+		margin-top: .5rem;
+		width: 100%;
+		height: 1px;
+		border: none;
 	}
 	.column {
 		display: flex;

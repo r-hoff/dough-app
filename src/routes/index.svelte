@@ -407,28 +407,35 @@
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
 <svelte:window on:pointermove|once={testScreen}/>
 <div class="container">
-	<h1 class="widthAll centerText marginAuto title">Pizza Dough Planner</h1>
+	<div class="column navbar">
+		<h1 class="widthAll centerText marginAuto title">Pizza Dough Planner</h1>
+		<hr class="hrNav">
+	</div>
 	{#if showWelcomeMessage}
-		<div class="row spaceEvenly">
-			<div class="marginBottom">
-				<b>Welcome to Pizza Dough Planner v2.0!</b><br>
-				This is the second official release of the application. All features are now implemented! Pizzaiolo Mode, ingredient
-				adjustment/addition/deletion, and print preview are all available. Pizza dough calculations are made based on number 
-				of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, please report
-				<a href="mailto:hoffr@oregonstate.edu">with this link</a>. Thanks for using Pizza Dough Planner!
+		<div class="column">
+			<div class="row spaceBetween marginTop">
+				<b class="">Welcome to Pizza Dough Planner!</b>
+				<div class="tooltipArrowAbove">
+					<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
+					{#if !tooltipMode}
+						<div class="tooltiptextArrowAbove">
+							Dismiss this message.
+						</div>
+					{/if}
+				</div>
 			</div>
-			<div class="tooltipArrowAbove">
-				<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
-				{#if !tooltipMode}
-					<div class="tooltiptextArrowAbove">
-						Dismiss this message.
-					</div>
-				{/if}
+			<div class="row">
+				<div class="marginBottom">
+					This is the second official release of the application. All features are now implemented! Pizzaiolo Mode, ingredient
+					adjustment/addition/deletion, and print preview are all available. Pizza dough calculations are made based on number 
+					of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, please report
+					<a href="mailto:hoffr@oregonstate.edu">with this link</a>. Thanks for using Pizza Dough Planner!
+				</div>
 			</div>
 		</div>
+		<hr>
 	{/if}
-	<hr>
-	<div class="row center">
+	<div class="row center marginTop">
 		<label for="servings">How many pizzas would you like to prepare dough for?</label>
 		<input id="servings" type="number" class="servings" readonly bind:value={servings} />
 		<div class="column">
@@ -722,29 +729,46 @@
 		margin: .5em;
 	}
 	.marginBottom {
-		margin-bottom: .5em;
-		max-width: 80%;
+		margin-bottom: .25em;
+	}
+	.marginTop {
+		margin-top: .5em;
 	}
 	.center {
 		align-items: center;
 		justify-content: center;
 	}
-	.alignCenter {
-		align-items: center;
-	}
 	.widthAll {
 		width: 100%;
 	}
 	.title {
-		padding-top: .5em;
-		padding-bottom: .5em;
+		padding-top: .75em;
+		padding-bottom: .75em;
 		font-size: 2.5vmax;
 	}
+	.navbar {
+		position: -webkit-sticky; /* Safari */
+		position: sticky;
+		top: 0;
+		background-color: white;
+		z-index: 1;
+		width: 100%;
+	}
+
 	.marginAuto {
 		margin: auto;
 	}
 	hr {
 		width: 100%;
+		height: 1px;
+		border: none;
+		background-color: #616161;
+	}
+	.hrNav {
+		margin: 0;
+		width: 100%;
+		height: 1px;
+		border: none;
 	}
 	.column {
 		display: flex;
@@ -765,14 +789,6 @@
 		border: 1px ;
 		border-style: solid;
 		border-color: transparent;
-		padding: .25em;
-	}
-	.recipeEdit {
-		border: 1px ;
-		border-style: solid;
-		background-color: #E8EAF6;
-		border-color: #757575;
-		border-radius: 6px;
 		padding: .25em;
 	}
 	.red {
@@ -842,6 +858,7 @@
 		width: 2em;
 		text-align: center; 
 	}
+
 	.styledButton {
 		width: 10em;
 		border: 0;
@@ -884,33 +901,6 @@
 		margin-left: -50%;
 	}
 	.tooltip:hover .tooltiptext {
-		visibility: visible;
-		opacity: 1;
-	}
-
-	.tooltipSmall {
-		position: relative;
-		display: inline-block;
-	}
-	.tooltipSmall .tooltiptextSmall {
-		opacity: 0;
-		transition: opacity .5s;
-		visibility: hidden;
-		background-color: #616161;
-		font-size: small;
-		color: #FFFFFF;
-		text-align: left;
-		border-radius: 6px;
-		padding: 10px;
-		width: 50%;
-		/* Position the tooltip */
-		position: absolute;
-		z-index: 1;
-		bottom: 100%;
-		left: 50%;
-		margin-left: -50%;
-	}
-	.tooltipSmall:hover .tooltiptextSmall {
 		visibility: visible;
 		opacity: 1;
 	}
