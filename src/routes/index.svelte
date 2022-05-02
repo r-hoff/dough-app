@@ -2,7 +2,8 @@
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
-	import { ingredientsW, servingsW, recipeW, tooltipModeW, advancedModeW, showWelcomeMessageW } from './stores';
+	import { ingredientsW, servingsW, recipeW, tooltipModeW, advancedModeW,
+		 showWelcomeMessageW, pizzaSizeW, lastSelectionW } from './stores';
 	import FaChevronUp from 'svelte-icons/fa/FaChevronUp.svelte'
 	import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
 	import FaChevronLeft from 'svelte-icons/fa/FaChevronLeft.svelte'
@@ -11,8 +12,6 @@
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
 	import FaBan from 'svelte-icons/fa/FaBan.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
-	import FaRegWindowClose from 'svelte-icons/fa/FaRegWindowClose.svelte'
-	import FaRegTimesCircle from 'svelte-icons/fa/FaRegTimesCircle.svelte'
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -42,6 +41,16 @@
 	let advancedMode;
 	advancedModeW.subscribe(value => {
 		advancedMode = value;
+	});
+
+	let pizzaSize;
+	pizzaSizeW.subscribe(value => {
+		pizzaSize = value;
+	});
+
+	let lastSelection;
+	lastSelectionW.subscribe(value => {
+		lastSelection = value;
 	});
 
 	function incServings() {
@@ -76,13 +85,12 @@
 		}
 	}
 
+
 	function decIngredientPercentage(ingredient) {
-		let increment;
-		// change increment if over 5%
-		if (ingredients[ingredient].percentage > .05) {
+		let increment = 0.001;
+
+		if (ingredients[ingredient].percentage - 0.01 >= .05) {
 			increment = 0.01;
-		} else if (ingredients[ingredient].percentage <= .05) {
-			increment = 0.001;
 		}
 		// only change the percentage if it stays at or above 0%
 		if (+((ingredients[ingredient].percentage - increment).toFixed(3)) >= 0) {
@@ -92,12 +100,10 @@
 	}
 
 	function incIngredientPercentage(ingredient) {
-		let increment;
-		// change increment if over 5%
-		if (ingredients[ingredient].percentage > .05) {
+		let increment = 0.001;
+
+		if (ingredients[ingredient].percentage >= .05) {
 			increment = 0.01;
-		} else if (ingredients[ingredient].percentage <= .05) {
-			increment = 0.001;
 		}
 		// only change the percentage if it stays at or below 100%
 		if (+((ingredients[ingredient].percentage + increment).toFixed(3)) <= 1) {
@@ -138,12 +144,10 @@
 				}
 			}
 		})
-
 	}
 
 	function saveRecipeEdit(edit) {
 		let edits = edit.split("\n\n");
-		console.log(edits.length)
 		if (edits.length <= 1) {
 			recipeW.set([])
 		} else {
@@ -155,12 +159,11 @@
 		})
 	}
 
-
 	function resetDefaultValues() {
 		Swal.fire({
 				title: "Reset to Default",
 				icon: 'warning',
-				text: "All ingredients, percentages, servings, and recipe content will be reset. Would you like to continue?",
+				text: "All ingredients, percentages, servings, pizza size, and recipe content will be reset. Would you like to continue?",
 				showCancelButton: true,
 				confirmButtonText: "Yes",
 				cancelButtonText: "No"
@@ -178,15 +181,17 @@
 					Salt: {base: 6, measurement: 6, percentage: .024, default: true},
 				});
 				recipeW.set([
-					"Heat Water to ~100°F (38°C). Dissolve Salt in Water, then stir in Yeast. Let sit for a minute or two.",
-					"Measure Flour into bowl of stand mixer. Add in the Water/Yeast/Salt mixture and stir with a spatula until just combined. "
-					+ "Then, mix on low for 3-5 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
+					"Heat water to ~100°F (38°C). Dissolve salt in water, then stir in yeast. Let sit for a minute or two.",
+					"Measure flour into bowl of stand mixer. Add in the water/yeast/salt mixture and stir with a spatula until just combined. "
+					+ "Then, mix on low for 2-3 minutes, or until the dough is uniform and smooth. Let rest for 20-30 minutes.",
 					"After resting, mix dough on low again for 30 seconds. Then, lightly oil another large bowl and transfer the dough ball. "
-					+ "Cover with a lid or plastic wrap and let proof for 2 hours at room temperature.",
+					+ "Cover with a lid or plastic wrap and let proof for 1-2 hours at room temperature.",
 					"Turn out dough onto surface. Cut and shape into equal sized balls and place into a large tupperware or "
 					+ "on individual dinner plates. Cover and place in refrigerator for 12-24 hours.",
 					"Remove dough from refrigerator 30-60 minutes before making pizza. Then stretch, top, and bake!"
 				]);
+				lastSelectionW.set(16);
+				pizzaSizeW.set(16);
 				recalcIngredients();
 			}
 		});
@@ -340,16 +345,40 @@
 			advancedModeW.update(value => !value);
 			Toast.fire({
 				icon: 'info',
-				title: 'Pizzaiolo Mode deactivated'
+				title: 'Pizzaiolo Mode disabled'
 			});
 		} else {
 			advancedModeW.update(value => !value);
 			Toast.fire({
 				icon: 'info',
-				title: 'Pizzaiolo Mode activated'
+				title: 'Pizzaiolo Mode enabled'
 			});
 		}
-	
+	}
+
+	function scaleIngredients(size) {
+		pizzaSizeW.set(size);
+
+		let oldArea = Math.pow(lastSelection / 2, 2) * Math.PI;
+		let newArea = Math.pow(pizzaSize / 2, 2) * Math.PI;
+		let modifier = newArea / oldArea;
+
+		const ingredientList = Object.keys(ingredients);
+		for (const ingredient of ingredientList) {
+			ingredients[ingredient].base *= modifier;
+		}
+
+		recalcIngredients();
+		lastSelectionW.set(size);
+	}
+
+	function roundQtr(num) {
+		return Math.round(num*4)/4;
+	}
+
+	let toggleVar = false;
+	function toggle() {
+		toggleVar = !toggleVar;
 	}
 
 </script>
@@ -360,11 +389,11 @@
 	{#if showWelcomeMessage}
 		<div class="row spaceEvenly">
 			<div class="marginBottom">
-				<b>Welcome to Pizza Dough Planner v1.0!</b><br>
-				This is the official first release of the application. Bugs are expected—don't let them keep you from exploring!
-				Pizza dough calculations are made based on number of servings, which can be adjusted with the up/down arrows below.
-				Options are available, but some are either not implemented or incomplete, so please approach with an open mind.
-				Please send comments, questions, or concerns: <a href="mailto:hoffr@oregonstate.edu">hoffr@oregonstate.edu</a>. Thanks for using Pizza Dough Planner!
+				<b>Welcome to Pizza Dough Planner v2.0!</b><br>
+				This is the second official release of the application. All features are now implemented! Pizzaiolo Mode, ingredient
+				adjustment/addition/deletion, and print preview are all available. Pizza dough calculations are made based on number 
+				of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, please report
+				<a href="mailto:hoffr@oregonstate.edu">with this link</a>. Thanks for using Pizza Dough Planner!
 			</div>
 			<div class="tooltipArrowAbove">
 				<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
@@ -399,6 +428,21 @@
 			</div>
 		</div>
 	</div>
+	<div class="row center pizzaSize">
+		<div>Pizza Size:</div>
+		<div>
+			<label for="small">&nbsp;&nbsp;&nbsp;12"</label>
+			<input bind:group={pizzaSize} type="radio" name="pizzaSize" value={12} on:change={() => scaleIngredients(12)}>
+		</div>
+		<div>
+			<label for="small">&nbsp;&nbsp;&nbsp;14"</label>
+			<input bind:group={pizzaSize} type="radio" name="pizzaSize" value={14} on:change={() => scaleIngredients(14)}>
+		</div>
+		<div>
+			<label for="small">&nbsp;&nbsp;&nbsp;16"</label>
+			<input bind:group={pizzaSize} type="radio" name="pizzaSize" value={16} on:change={() => scaleIngredients(16)}>
+		</div>
+	</div>
 	<div class="row spaceEvenly ingOpContainer">
 		<div class="column ingredientsContainer">
 			<h3 class="centerText setMargin">Ingredient Summary</h3>
@@ -428,10 +472,10 @@
 				<div class="column centerText">
 					<u>Measurement</u>
 					{#each Object.entries(ingredients) as [name, details]}
-						{#if details.measurement % 1 !== 0}
-							<div>{details.measurement.toFixed(2)}g</div>
+						{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) !== 0}
+							<div>{roundQtr(+details.measurement.toFixed(2))}g</div>
 						{/if}
-						{#if details.measurement % 1 === 0}
+						{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) === 0}
 							<div>{details.measurement.toFixed(0)}g</div>
 						{/if}
 					{/each}
@@ -462,10 +506,10 @@
 						{/if}
 						<div class="column widthAll">
 							{#each Object.entries(ingredients) as [name, details]}
-								{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) !== 0}
+								{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) !== 0}
 									<div>{(details.percentage * 100).toFixed(1)} %</div>
 								{/if}
-								{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) === 0}
+								{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) === 0}
 									<div>{(details.percentage * 100).toFixed(0)} %</div>
 								{/if}
 							{/each}
@@ -519,7 +563,6 @@
 			<div class="column options">
 				<div class="row spaceEvenly options">
 					<div class="marginAuto">
-						<br>
 						<div class="tooltip centerText">
 							<div>Disable tooltips:</div>
 							{#if !tooltipMode}
@@ -529,13 +572,11 @@
 								</div>
 							{/if}
 						</div>
-						<div class="{tooltipMode? "sliderOff": "sliderOn"} marginAuto">
-							<button class="{tooltipMode? "sliderActive": "sliderNotActive"}" on:click={toggleTooltipMode}>{tooltipMode? "ON": "OFF"}</button>
+						<div class="{tooltipMode? "sliderOn": "sliderOff"} marginAuto">
+							<button class="{tooltipMode? "sliderActive": "sliderNotActive"}" on:click={toggleTooltipMode}>&nbsp;&nbsp;</button>
 						</div>
-						<br>
 					</div>
 					<div class="marginAuto">
-						<br>
 						<div class="tooltip centerText">
 							<div>Pizzaiolo Mode:</div>
 							{#if !tooltipMode}
@@ -546,14 +587,12 @@
 								</div>
 							{/if}
 						</div>
-						<div class="{advancedMode? "sliderOff": "sliderOn"} marginAuto">
-							<button class="{advancedMode? "sliderActive": "sliderNotActive"}" on:click={toggleAdvancedMode}>{advancedMode? "ON": "OFF"}</button>
+						<div class="{advancedMode? "sliderOn": "sliderOff"} marginAuto">
+							<button class="{advancedMode? "sliderActive": "sliderNotActive"}" on:click={toggleAdvancedMode}>&nbsp;&nbsp;</button>
 						</div>
-						<br>
 					</div>
 				</div>
 			</div>
-			<br>
 			<div class="centerText lightText">Activate Pizzaiolo Mode to fine tune your recipe!</div>
 		</div>
 	</div>
@@ -615,7 +654,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		width: 80%;
+		width: 90%;
 		height: 100%;
 		margin: auto;
 	}
@@ -643,6 +682,12 @@
 	.options {
 		background-color: #EEEEEE;
 		border-radius: 12px;
+		padding-top: .4rem;
+		padding-bottom: .4rem;
+	}
+	.pizzaSize {
+		padding-top: .5rem;
+		padding-bottom: .5rem;
 	}
 	.centerText {
 		text-align: center;
@@ -671,6 +716,7 @@
 	.title {
 		padding-top: .5em;
 		padding-bottom: .5em;
+		font-size: 2.5vmax;
 	}
 	.marginAuto {
 		margin: auto;
@@ -744,30 +790,29 @@
 		border: none;
 		background-color: transparent;
 	}
-	.sliderOff {
-		width: 4em;
+	.sliderOn {
+		width: 2.5rem;
 		text-align: right;
-		background-color: #283593;
+		background-color: #00BCD4;
 		border-radius: 12px;
 	}
-	.sliderOn {
-		width: 4em;
+	.sliderOff {
+		width: 2.5rem;
 		text-align: left;
 		background-color: #BDBDBD;
 		border-radius: 12px;
 	}
 	.sliderActive {
-		font-weight: bold;
 		background-color: white;
-		border-color: #283593;
 		border-radius: 12px;
+		border: none;
+		border: 2px solid #00BCD4;
 	}
 	.sliderNotActive {
-		font-weight: bold;
 		color: #757575;
 		background-color: white;
-		border-color: #BDBDBD;
 		border-radius: 12px;
+		border: 2px solid #BDBDBD;
 	}
 	.servings {
 		border: none;
@@ -775,32 +820,22 @@
 		width: 2em;
 		text-align: center; 
 	}
-	input {
-		width: 90%;
-		border: none;
-		border-bottom: 1px solid #BDBDBD;
-	}
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
 	.styledButton {
 		width: 10em;
 		border: 0;
-		background-color: #303F9F;
+		background-color: #0097A7;
 		color: white;
         border-radius: 6px;
         padding: 8px 12px;
         font-weight: bold;
 	}
 	.styledButton:hover {
-		background-color: #283593;
+		background-color: #00838F;
 		-webkit-box-shadow: 0px 0px 10px 5px rgba(61,61,61,0.3); 
 		box-shadow: 0px 0px 10px 5px rgba(61,61,61,0.3);
 	}
 	.styledButton:active {
-		background-color: #1A237E;
+		background-color: #006064;
 	}
 
 	/* tooltip related */
@@ -812,7 +847,7 @@
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
-		background-color: #3F51B5;
+		background-color: #616161;
 		font-size: small;
 		color: #FFFFFF;
 		text-align: left;
@@ -839,7 +874,7 @@
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
-		background-color: #3F51B5;
+		background-color: #616161;
 		font-size: small;
 		color: #FFFFFF;
 		text-align: left;
@@ -866,7 +901,7 @@
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
-		background-color: #3F51B5;
+		background-color: #616161;
 		font-size: small;
 		color: #FFFFFF;
 		text-align: left;
@@ -889,7 +924,7 @@
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
-		background-color: #3F51B5;
+		background-color: #616161;
 		font-size: small;
 		color: #FFFFFF;
 		text-align: left;

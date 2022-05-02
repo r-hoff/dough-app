@@ -1,8 +1,11 @@
 <script>
+	import Swal from 'sweetalert2';
+	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
-    import { ingredientsW, servingsW, recipeW, tooltipModeW } from './stores';
+    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW } from './stores';
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
+	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -24,6 +27,18 @@
 		tooltipMode = value;
 	});
 
+	let recipeTitle;
+	recipeTitleW.subscribe(value => {
+		recipeTitle = value;
+	});
+
+	const Toast = Swal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 2000
+	})
+
 	function calcTotal() {
 		let total= 0;
 		const ingredientList = Object.keys(ingredients);
@@ -33,8 +48,34 @@
 		return total;
 	}
 
+	function editTitle() {
+		let preEdit = recipeTitle;
+		Swal.fire({
+			title: "Edit Title",
+			input: "text",
+			showCancelButton: true,
+			cancelButtonText: "Cancel",
+			confirmButtonText: "Save",
+			inputValue: preEdit
+		}).then((edit) => {
+			if (edit.isConfirmed) {
+				if (edit.value !== preEdit) {
+					recipeTitleW.set(edit.value);
+					Toast.fire({
+						icon: 'success',
+						title: 'Title updated'
+					})
+				}
+			}
+		})
+	}
+
 	function routeToHome() {
 		goto('/') 
+	}
+
+	function roundQtr(num) {
+		return Math.round(num*4)/4;
 	}
 
 </script>
@@ -50,6 +91,14 @@
 			{/if}
 		</div>
 		<div class="tooltipArrowBelow">
+			<button class="transparentButton iconLarge" on:click={editTitle}><FaEdit /></button>
+			{#if !tooltipMode}
+				<div id="ttEdit" class="tooltiptextArrowBelow">
+					Edit recipe title.
+				</div>
+			{/if}
+		</div>
+		<div class="tooltipArrowBelow">
 			<button class="transparentButton iconLarge" on:click={() => window.print()}><FaPrint /></button>
 			{#if !tooltipMode}
 				<div id="ttPrint" class="tooltiptextArrowBelow">
@@ -58,8 +107,9 @@
 			{/if}
 		</div>
 	</div>
+	<hr>
 	<div id="print" class="column">
-		<h1 class="centerText marginAuto title">Pizza Dough Recipe</h1>
+		<h1 class="centerText marginAuto title">{recipeTitle}</h1>
 		{#if servings > 1}
 			<div class="row center servings">Makes {servings} pizzas: ~{Math.round(calcTotal()/servings)}g each</div>
 		{/if}
@@ -80,10 +130,10 @@
 			<div class="column centerText">
 				<u>Measurement</u>
 				{#each Object.entries(ingredients) as [name, details]}
-					{#if details.measurement % 1 !== 0}
-						<div>{details.measurement.toFixed(2)}g</div>
+					{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) !== 0}
+						<div>{roundQtr(+details.measurement.toFixed(2))}g</div>
 					{/if}
-					{#if details.measurement % 1 === 0}
+					{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) === 0}
 						<div>{details.measurement.toFixed(0)}g</div>
 					{/if}
 				{/each}
@@ -93,10 +143,10 @@
 				<div class="row">
 					<div class="column widthAll">
 						{#each Object.entries(ingredients) as [name, details]}
-							{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) !== 0}
+							{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) !== 0}
 								<div>{(details.percentage * 100).toFixed(1)} %</div>
 							{/if}
-							{#if (details.percentage / .01) - (Math.round(details.percentage * 100)) === 0}
+							{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) === 0}
 								<div>{(details.percentage * 100).toFixed(0)} %</div>
 							{/if}
 						{/each}
@@ -127,12 +177,12 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		width: 80%;
+		width: 90%;
 		height: 100%;
 		margin: auto;
 	}
 	@media print {
-		#ttPrint, #ttPrint {
+		#ttPrint, #ttPrint, #ttEdit {
 			visibility: hidden;
 		}
 		#pad1, #pad2 {
@@ -149,7 +199,7 @@
 	.navbar {
 		display: flex;
 		flex-direction: row;
-		width: 60%;
+		width: 100%;
 	}
 	.maxHalf {
 		width: 50%;
@@ -374,7 +424,7 @@
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
-		background-color: #3F51B5;
+		background-color: #616161;
 		font-size: small;
 		color: #FFFFFF;
 		text-align: left;
