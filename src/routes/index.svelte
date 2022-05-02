@@ -180,10 +180,10 @@
 				})
 				servingsW.set(1);
 				ingredientsW.set({
-					Flour: {base: 250, measurement: 250, percentage: 1, default: true},
-					Water: {base: 175, measurement: 175, percentage: .7, default: true},
-					Yeast: {base: 0.5, measurement: 0.5, percentage: .002, default: true},
-					Salt: {base: 6, measurement: 6, percentage: .024, default: true},
+					Flour: { base: 250, measurement: 250, percentage: 1, default: true },
+					Water: { base: 175, measurement: 175, percentage: .7, default: true },
+					Yeast: { base: 0.75, measurement: 0.75, percentage: .003, default: true },
+					Salt: { base: 6.5, measurement: 6.5, percentage: .026, default: true },
 				});
 				recipeW.set([
 					"Heat water to ~100°F (38°C). Dissolve salt in water, then stir in yeast. Let sit for a minute or two.",

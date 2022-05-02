@@ -5,8 +5,8 @@ export let servingsW = writable(1);
 export let ingredientsW = writable({
     Flour: { base: 250, measurement: 250, percentage: 1, default: true },
     Water: { base: 175, measurement: 175, percentage: .7, default: true },
-    Yeast: { base: 0.5, measurement: 0.5, percentage: .002, default: true },
-    Salt: { base: 6, measurement: 6, percentage: .024, default: true },
+    Yeast: { base: 0.75, measurement: 0.75, percentage: .003, default: true },
+    Salt: { base: 6.5, measurement: 6.5, percentage: .026, default: true },
 });
 
 export let recipeW = writable([
