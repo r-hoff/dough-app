@@ -2,10 +2,12 @@
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
-    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW, mobileW } from './stores';
+    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW, mobileW, pizzaSizeW } from './stores';
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
+	import {toWords} from 'number-to-words/src/index'
+
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -35,6 +37,11 @@
 	let mobile;
 	mobileW.subscribe(value => {
 		mobile = value;
+	});
+
+	let pizzaSize;
+	pizzaSizeW.subscribe(value => {
+		pizzaSize = value;
 	});
 
 	const Toast = Swal.mixin({
@@ -118,10 +125,10 @@
 	<div id="print" class="column">
 		<h1 class="centerText marginAuto title">{recipeTitle}</h1>
 		{#if servings > 1}
-			<div class="row center servings">Makes {servings} pizzas: ~{Math.round(calcTotal()/servings)}g each</div>
+			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizzas, ~{Math.round(calcTotal()/servings)}g each.</div>
 		{/if}
 		{#if servings === 1}
-			<div class="row center servings">Makes {servings} pizza</div>
+			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizza.</div>
 		{/if}
 		<br>
 		<h3 class="centerText setMargin">Ingredient Summary</h3>

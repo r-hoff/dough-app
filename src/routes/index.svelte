@@ -206,6 +206,15 @@
 		goto('/print');
 	}
 
+	function toTitleCase(str) {
+		return str.replace(
+			/\w\S*/g,
+			function(txt) {
+				return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+			}
+		);
+	}
+
 	function addIngredient() {
 		Swal.fire({
 			title: "Add Ingredient",
@@ -219,7 +228,7 @@
 			confirmButtonText: "Continue",
 			inputValidator: (name) => {
 				if (!name) {
-				return 'Please enter an ingredient name'
+					return 'Please enter an ingredient name'
 				}
 			}
 		}).then((name) => {
@@ -233,21 +242,22 @@
 					confirmButtonText: "Add",
 					inputValidator: (measurement) => {
 						if (measurement <= 0) {
-						return 'Measurement must be greater than zero'
+							return 'Measurement must be greater than zero'
 						}
 					}
 				}).then((measurement) => {
+					let newIngredientName = toTitleCase(name.value);
 					if (measurement.isDismissed) {
 						Toast.fire({
 							icon: 'error',
-							title: `Cancelled adding ingedient: ${name.value}`
+							title: `Cancelled adding ingedient: ${newIngredientName}`
 						})
 					}
 					if(measurement.isConfirmed) {
-						ingredients[name.value] = {base: measurement.value / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement, default: false};
+						ingredients[newIngredientName] = {base: measurement.value / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement, default: false};
 						Toast.fire({
 							icon: 'success',
-							title: `${name.value} was added successfully!`
+							title: `${newIngredientName} was added successfully!`
 						})
 					}
 				})
