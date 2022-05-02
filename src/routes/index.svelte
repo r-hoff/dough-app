@@ -280,7 +280,7 @@
 
 	const ToastCountdown = Swal.mixin({
 		toast: true,
-		position: 'top',
+		position: 'top-start',
 		showConfirmButton: true,
 		confirmButtonText: "Undo",
 		showCancelButton: true,
