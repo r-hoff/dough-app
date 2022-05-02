@@ -2,7 +2,7 @@
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
-    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW } from './stores';
+    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW, mobileW } from './stores';
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
@@ -32,9 +32,14 @@
 		recipeTitle = value;
 	});
 
+	let mobile;
+	mobileW.subscribe(value => {
+		mobile = value;
+	});
+
 	const Toast = Swal.mixin({
 		toast: true,
-		position: 'top-end',
+		position: mobile? 'top': 'top-end',
 		showConfirmButton: false,
 		timer: 2000
 	})

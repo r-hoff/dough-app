@@ -31,3 +31,5 @@ export let recipeTitleW = writable("Pizza Dough Recipe");
 export let pizzaSizeW = writable(16);
 
 export let lastSelectionW = writable(16);
+
+export let mobileW = writable(false)

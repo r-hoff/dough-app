@@ -3,7 +3,7 @@
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
 	import { ingredientsW, servingsW, recipeW, tooltipModeW, advancedModeW,
-		 showWelcomeMessageW, pizzaSizeW, lastSelectionW } from './stores';
+		 showWelcomeMessageW, pizzaSizeW, lastSelectionW, mobileW } from './stores';
 	import FaChevronUp from 'svelte-icons/fa/FaChevronUp.svelte'
 	import FaChevronDown from 'svelte-icons/fa/FaChevronDown.svelte'
 	import FaChevronLeft from 'svelte-icons/fa/FaChevronLeft.svelte'
@@ -51,6 +51,11 @@
 	let lastSelection;
 	lastSelectionW.subscribe(value => {
 		lastSelection = value;
+	});
+
+	let mobile;
+	mobileW.subscribe(value => {
+		mobile = value;
 	});
 
 	function incServings() {
@@ -271,16 +276,16 @@
 		})
 	}
 
-	const Toast = Swal.mixin({
+	let Toast = Swal.mixin({
 		toast: true,
 		position: 'top-end',
 		showConfirmButton: false,
 		timer: 2000
 	})
 
-	const ToastCountdown = Swal.mixin({
+	let ToastCountdown = Swal.mixin({
 		toast: true,
-		position: 'top-start',
+		position: 'top-end',
 		showConfirmButton: true,
 		confirmButtonText: "Undo",
 		showCancelButton: true,
@@ -294,26 +299,48 @@
 		}
 	})
 
+	function testScreen() {
+		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
+			mobileW.set(true)
+			tooltipModeW.set(true);
+
+			Toast = Swal.mixin({
+				toast: true,
+				position: 'top',
+				showConfirmButton: false,
+				timer: 2000
+			})
+
+			ToastCountdown = Swal.mixin({
+				toast: true,
+				position: 'top',
+				showConfirmButton: true,
+				confirmButtonText: "Undo",
+				showCancelButton: true,
+				cancelButtonText: "Dismiss",
+				timer: 2000,
+				timerProgressBar: true,
+				reverseButtons: true,
+				didOpen: (toast) => {
+					toast.addEventListener('mouseenter', Swal.stopTimer)
+					toast.addEventListener('mouseleave', Swal.resumeTimer)
+				}
+			})
+		}
+	}
+
+
 	function dismissWelcome() {
+		testScreen();
 		showWelcomeMessageW.update(value => !value);
 		ToastCountdown.fire({
 			icon: 'info',
 			title: 'Thanks for using Dough Planner!'
 		}).then((result) => {
-		if (result.isConfirmed) {
-			showWelcomeMessageW.update(value => !value);
-		}
-	})
-	}
-
-	let mobile = false;
-	function testScreen() {
-		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
-			mobile = true;
-			tooltipModeW.update(value => true);
-		} else {
-			mobile = false;
-		}
+			if (result.isConfirmed) {
+				showWelcomeMessageW.update(value => !value);
+			}
+		})
 	}
 
 	function toggleTooltipMode() {
