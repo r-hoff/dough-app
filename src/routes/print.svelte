@@ -125,7 +125,8 @@
 	<div id="print" class="column">
 		<h1 class="centerText marginAuto title">{recipeTitle}</h1>
 		{#if servings > 1}
-			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizzas, ~{Math.round(calcTotal()/servings)}g each.</div>
+			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizzas.</div>
+			<div class="row center servings">(~{Math.round(calcTotal()/servings)}g dough balls)</div>
 		{/if}
 		{#if servings === 1}
 			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizza.</div>
