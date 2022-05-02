@@ -280,7 +280,7 @@
 
 	const ToastCountdown = Swal.mixin({
 		toast: true,
-		position: 'top-end',
+		position: 'top',
 		showConfirmButton: true,
 		confirmButtonText: "Undo",
 		showCancelButton: true,
@@ -374,11 +374,6 @@
 
 	function roundQtr(num) {
 		return Math.round(num*4)/4;
-	}
-
-	let toggleVar = false;
-	function toggle() {
-		toggleVar = !toggleVar;
 	}
 
 </script>
