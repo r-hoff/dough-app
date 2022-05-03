@@ -436,10 +436,10 @@
 			</div>
 			<div class="row">
 				<div class="marginBottom">
-					This is the second official release of the application. All features are now implemented! Pizzaiolo Mode, ingredient
+					This is the second official release of the application. All features are now implemented. Pizzaiolo Mode, ingredient
 					adjustment/addition/deletion, and print preview are all available. Pizza dough calculations are made based on number 
-					of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, please report
-					<a href="mailto:hoffr@oregonstate.edu">with this link</a>. Thanks for using Pizza Dough Planner!
+					of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, feel free to 
+					<a href="mailto:hoffr@oregonstate.edu">report</a>.
 				</div>
 			</div>
 		</div>
@@ -612,7 +612,7 @@
 							{/if}
 						</div>
 						<div class="{tooltipMode? "sliderOn": "sliderOff"} marginAuto">
-							<button class="{tooltipMode? "sliderActive": "sliderNotActive"}" on:click={toggleTooltipMode}>&nbsp;&nbsp;</button>
+							<button class="{tooltipMode? "sliderActive": "sliderNotActive"}" on:click={toggleTooltipMode}>&nbsp;</button>
 						</div>
 					</div>
 					<div class="marginAuto">
@@ -627,7 +627,7 @@
 							{/if}
 						</div>
 						<div class="{advancedMode? "sliderOn": "sliderOff"} marginAuto">
-							<button class="{advancedMode? "sliderActive": "sliderNotActive"}" on:click={toggleAdvancedMode}>&nbsp;&nbsp;</button>
+							<button class="{advancedMode? "sliderActive": "sliderNotActive"}" on:click={toggleAdvancedMode}>&nbsp;</button>
 						</div>
 					</div>
 				</div>
@@ -659,9 +659,8 @@
 		</div>
 	</div>
 	<br>
-	<div class="row">
-		<div class="widthAll centerText">
-			<div class="tooltip">
+	<div class="row spaceEvenly centerText">
+			<div class="tooltip widthAll">
 				<button class="styledButton" on:click={resetDefaultValues}>Reset to Default</button>
 				{#if !tooltipMode}
 					<div class="tooltiptext">
@@ -670,9 +669,8 @@
 					</div>
 				{/if}
 			</div>
-		</div>
-		<div class="widthAll centerText">
-			<div class="tooltip">
+
+			<div class="tooltip widthAll">
 				<button class="styledButton" on:click={routeToPrint}>Print Preview</button>
 				{#if !tooltipMode}
 					<div class="tooltiptext">
@@ -681,7 +679,6 @@
 					</div>
 				{/if}
 			</div>
-		</div>
 	</div>
 </div>
 
@@ -839,24 +836,28 @@
 		background-color: transparent;
 	}
 	.sliderOn {
-		width: 2.5rem;
+		width: 40%;
 		text-align: right;
 		background-color: #00BCD4;
 		border-radius: 12px;
 	}
 	.sliderOff {
-		width: 2.5rem;
+		width: 40%;
 		text-align: left;
 		background-color: #BDBDBD;
 		border-radius: 12px;
 	}
 	.sliderActive {
+		height: 100%;
+		width: 50%;
 		background-color: white;
 		border-radius: 12px;
 		border: none;
 		border: 2px solid #00BCD4;
 	}
 	.sliderNotActive {
+		height: 100%;
+		width: 50%;
 		color: #757575;
 		background-color: white;
 		border-radius: 12px;
@@ -870,13 +871,14 @@
 	}
 
 	.styledButton {
-		width: 10em;
+		height: 100%;
+		max-width: 75%;
 		border: 0;
 		background-color: #0097A7;
 		color: white;
         border-radius: 6px;
-        padding: 8px 12px;
         font-weight: bold;
+		padding: 8px 12px;
 	}
 	.styledButton:hover {
 		background-color: #00838F;
