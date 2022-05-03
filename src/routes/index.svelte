@@ -425,14 +425,7 @@
 		<div class="column">
 			<div class="row spaceBetween marginTop">
 				<b class="">Welcome to Pizza Dough Planner!</b>
-				<div class="tooltipArrowAbove">
-					<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
-					{#if !tooltipMode}
-						<div class="tooltiptextArrowAbove">
-							Dismiss this message.
-						</div>
-					{/if}
-				</div>
+				<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
 			</div>
 			<div class="row">
 				<div class="marginBottom">
@@ -453,7 +446,7 @@
 				<button class="transparentButton icon" on:click={incServings}><FaChevronUp /></button>
 				{#if !tooltipMode}
 					<div class="tooltiptextArrowAbove">
-						Increase the number of pizzas created by this recipe by one.
+						More pizza!
 					</div>
 				{/if}
 			</div>
@@ -461,7 +454,7 @@
 				<button class="transparentButton icon" on:click={decServings}><FaChevronDown /></button>
 				{#if !tooltipMode}
 					<div class="tooltiptextArrowBelow">
-						Decrease the number of pizzas created by this recipe by one.
+						Less pizza!
 					</div>
 				{/if}
 			</div>
@@ -638,10 +631,10 @@
 	<br>
 	<hr>
 	<div class="column">
-		<div class="row spaceBetween">
+		<div class="row centerVertical">
 			<h4>Step-by-step Pizza Dough Instructions:</h4>
 			{#if advancedMode}
-				<div class="tooltipArrowAbove">
+				<div class="tooltipArrowAbove edit">
 					<button class="transparentButton icon" on:click={editInstructions}><FaEdit /></button>
 					{#if !tooltipMode}
 						<div class="tooltiptextArrowAbove">
@@ -660,20 +653,20 @@
 	</div>
 	<br>
 	<div class="row spaceEvenly centerText">
-			<div class="tooltip widthAll">
-				<button class="styledButton" on:click={resetDefaultValues}>Reset to Default</button>
+			<div class="tooltipSmall widthAll">
+				<button class="styledButton" on:click={resetDefaultValues}>Reset Default</button>
 				{#if !tooltipMode}
-					<div class="tooltiptext">
+					<div class="tooltiptextSmall">
 						<u>Reset to Default</u><br>
 						Reset all ingredients, measurements, and percentages to their default values.
 					</div>
 				{/if}
 			</div>
 
-			<div class="tooltip widthAll">
+			<div class="tooltipSmall widthAll">
 				<button class="styledButton" on:click={routeToPrint}>Print Preview</button>
 				{#if !tooltipMode}
-					<div class="tooltiptext">
+					<div class="tooltiptextSmall">
 						<u>Print Preview</u><br>
 						Prepare a neatly formatted document with all ingredient measurements and instructions.
 					</div>
@@ -744,6 +737,12 @@
 	.center {
 		align-items: center;
 		justify-content: center;
+	}
+	.centerVertical {
+		align-items: center;
+	}
+	.edit {
+		padding-left: 1rem;
 	}
 	.widthAll {
 		width: 100%;
@@ -848,18 +847,22 @@
 		border-radius: 12px;
 	}
 	.sliderActive {
+		height: 100%;
 		display: inline-flex;
 		align-items: center;
-		width: 50%;
+		width: 55%;
+		font-size: 90%;
 		background-color: white;
 		border-radius: 12px;
 		border: none;
 		border: 2px solid #00BCD4;
 	}
 	.sliderNotActive {
+		height: 100%;
 		display: inline-flex;
 		align-items: center;
-		width: 50%;
+		font-size: 90%;
+		width: 55%;
 		color: #757575;
 		background-color: white;
 		border-radius: 12px;
@@ -906,7 +909,7 @@
 		text-align: left;
 		border-radius: 6px;
 		padding: 10px;
-		width: 225%;
+		width: 150%;
 		/* Position the tooltip */
 		position: absolute;
 		z-index: 1;
@@ -915,6 +918,33 @@
 		margin-left: -50%;
 	}
 	.tooltip:hover .tooltiptext {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	.tooltipSmall {
+		position: relative;
+		display: inline-block;
+	}
+	.tooltipSmall .tooltiptextSmall {
+		opacity: 0;
+		transition: opacity .5s;
+		visibility: hidden;
+		background-color: #616161;
+		font-size: small;
+		color: #FFFFFF;
+		text-align: left;
+		border-radius: 6px;
+		padding: 10px;
+		width: 50%;
+		/* Position the tooltip */
+		position: absolute;
+		z-index: 1;
+		bottom: 100%;
+		left: 75%;
+		margin-left: -50%;
+	}
+	.tooltipSmall:hover .tooltiptextSmall {
 		visibility: visible;
 		opacity: 1;
 	}
@@ -933,7 +963,7 @@
 		text-align: left;
 		border-radius: 6px;
 		padding: 10px;
-		width: 500%;
+		width: 400%;
 		position: absolute;
 		z-index: 1;
 	}
@@ -956,7 +986,7 @@
 		text-align: left;
 		border-radius: 6px;
 		padding: 10px;
-		width: 500%;
+		width: 475%;
 		bottom: 100%;
 		left: 50%;
 		position: absolute;
