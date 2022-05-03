@@ -848,7 +848,8 @@
 		border-radius: 12px;
 	}
 	.sliderActive {
-		height: 100%;
+		display: inline-flex;
+		align-items: center;
 		width: 50%;
 		background-color: white;
 		border-radius: 12px;
@@ -856,7 +857,8 @@
 		border: 2px solid #00BCD4;
 	}
 	.sliderNotActive {
-		height: 100%;
+		display: inline-flex;
+		align-items: center;
 		width: 50%;
 		color: #757575;
 		background-color: white;
