@@ -835,13 +835,13 @@
 		background-color: transparent;
 	}
 	.sliderOn {
-		width: 40%;
+		width: 45%;
 		text-align: right;
 		background-color: #00BCD4;
 		border-radius: 12px;
 	}
 	.sliderOff {
-		width: 40%;
+		width: 45%;
 		text-align: left;
 		background-color: #BDBDBD;
 		border-radius: 12px;
@@ -850,7 +850,7 @@
 		height: 100%;
 		display: inline-flex;
 		align-items: center;
-		width: 55%;
+		width: 50%;
 		font-size: 90%;
 		background-color: white;
 		border-radius: 12px;
@@ -862,7 +862,7 @@
 		display: inline-flex;
 		align-items: center;
 		font-size: 90%;
-		width: 55%;
+		width: 50%;
 		color: #757575;
 		background-color: white;
 		border-radius: 12px;
