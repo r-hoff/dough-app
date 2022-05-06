@@ -519,13 +519,13 @@
 					<u>Percentage</u>
 					<div class="row">
 						{#if advancedMode}
-							<div class="column">
+							<div class="column" in:fly|local={{ x: -50 }} out:fly|local={{ x: -50 }}>
 								{#each Object.entries(ingredients) as [name, details]}
 									{#if name === "Flour"}
 										<div class="row"><br></div>
 									{/if}
 									{#if name !== "Flour"}
-										<div class="row" in:fly|local={{ x: -50 }} out:fly|local={{ x: -50 }}>
+										<div class="row">
 											<div class="tooltipArrowAbove">
 												<button class="transparentButton iconSmall" on:click={() => decIngredientPercentage(name)}><FaChevronLeft /></button>
 												{#if !tooltipMode}
@@ -554,25 +554,25 @@
 							{/each}
 						</div>
 						{#if advancedMode}
-						<div class="column">
-							{#each Object.entries(ingredients) as [name, details]}
-								{#if name === "Flour"}
-									<div class="row"><br></div>
-								{/if}
-								{#if name !== "Flour"}
-									<div class="row" in:fly|local={{ x: 50 }} out:fly|local={{ x: 50 }}>
-										<div class="tooltipArrowAbove">
-											<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
-											{#if !tooltipMode}
-												<div class="tooltiptextArrowAbove">
-													Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
-												</div>
-											{/if}
+							<div class="column" in:fly|local={{ x: 50 }} out:fly|local={{ x: 50 }}>
+								{#each Object.entries(ingredients) as [name, details]}
+									{#if name === "Flour"}
+										<div class="row"><br></div>
+									{/if}
+									{#if name !== "Flour"}
+										<div class="row">
+											<div class="tooltipArrowAbove">
+												<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
+												{#if !tooltipMode}
+													<div class="tooltiptextArrowAbove">
+														Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
+													</div>
+												{/if}
+											</div>
 										</div>
-									</div>
-								{/if}
-							{/each}
-						</div>
+									{/if}
+								{/each}
+							</div>
 						{/if}
 					</div>
 				</div>
