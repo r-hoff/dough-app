@@ -579,7 +579,7 @@
 				<div class="column"></div>
 			</div>
 			{#if advancedMode}
-				<div class="row center addIngredient" in:scale out:scale>
+				<div class="row center addIngredient" in:scale|local out:scale|local>
 					<div class="tooltipArrowAbove">
 						<button class="transparentButton icon green" on:click={addIngredient}><FaPlus /></button>
 						{#if !tooltipMode}
@@ -639,7 +639,7 @@
 		<div class="row centerVertical">
 			<h4>Step-by-step Pizza Dough Instructions:</h4>
 			{#if advancedMode}
-				<div class="tooltipArrowAbove edit" in:scale out:scale>
+				<div class="tooltipArrowAbove edit" in:scale|local out:scale|local>
 					<button class="transparentButton icon" on:click={editInstructions}><FaEdit /></button>
 					{#if !tooltipMode}
 						<div class="tooltiptextArrowAbove">
