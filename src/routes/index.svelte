@@ -12,6 +12,7 @@
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
 	import FaBan from 'svelte-icons/fa/FaBan.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
+	import { fade, fly, scale } from 'svelte/transition';
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -90,7 +91,6 @@
 		}
 	}
 
-
 	function decIngredientPercentage(ingredient) {
 		let increment = 0.001;
 
@@ -138,8 +138,7 @@
 			title: "Edit Instructions",
 			text: "Enter instructions below",
 			input: "textarea",
-			showCancelButton: true,
-			cancelButtonText: "Cancel",
+			showCloseButton: true,
 			confirmButtonText: "Save",
 			inputValue: preEdit
 		}).then((edit) => {
@@ -422,7 +421,7 @@
 		<hr class="hrNav">
 	</div>
 	{#if showWelcomeMessage}
-		<div class="column">
+		<div class="column" in:fade|local out:fade|local>
 			<div class="row spaceBetween marginTop">
 				<b class="">Welcome to Pizza Dough Planner!</b>
 				<button class="transparentButton icon red" on:click={dismissWelcome}><FaTimes /></button>
@@ -486,7 +485,7 @@
 						<div class="row center">
 							{#if advancedMode}
 								{#if !details.default}
-									<div class="tooltipArrowAbove">
+									<div class="tooltipArrowAbove" in:scale out:scale>
 										<button class="transparentButton iconMed red" on:click={() =>deleteIngredient(name)}><FaBan /></button>
 										{#if !tooltipMode}
 											<div class="tooltiptextArrowAbove">
@@ -497,19 +496,23 @@
 									<div>&nbsp;</div>
 								{/if}
 							{/if}
-							<div>{name}</div>
+							<div in:scale|local out:fade|local>{name}</div>
 						</div>
 					{/each}
 				</div>
 				<div class="column centerText">
 					<u>Measurement</u>
 					{#each Object.entries(ingredients) as [name, details]}
-						{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) !== 0}
-							<div>{roundQtr(+details.measurement.toFixed(2))}g</div>
-						{/if}
-						{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) === 0}
-							<div>{details.measurement.toFixed(0)}g</div>
-						{/if}
+						<div class="transition-container">
+							<div in:scale|local out:fade|local>
+								{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) !== 0}
+									{roundQtr(+details.measurement.toFixed(2))}g
+								{/if}
+								{#if +(details.measurement.toFixed(2) - Math.round(details.measurement)) === 0}
+									{details.measurement.toFixed(0)}g
+								{/if}
+							</div>
+						</div>
 					{/each}
 				</div>
 				<div class="column centerText">
@@ -522,7 +525,7 @@
 										<div class="row"><br></div>
 									{/if}
 									{#if name !== "Flour"}
-										<div class="row">
+										<div class="row" in:fly={{ x: -50 }} out:fly={{ x: -50 }}>
 											<div class="tooltipArrowAbove">
 												<button class="transparentButton iconSmall" on:click={() => decIngredientPercentage(name)}><FaChevronLeft /></button>
 												{#if !tooltipMode}
@@ -538,12 +541,16 @@
 						{/if}
 						<div class="column widthAll">
 							{#each Object.entries(ingredients) as [name, details]}
-								{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) !== 0}
-									<div>{(details.percentage * 100).toFixed(1)} %</div>
-								{/if}
-								{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) === 0}
-									<div>{(details.percentage * 100).toFixed(0)} %</div>
-								{/if}
+								<div class="transition-container">
+									<div in:scale|local out:fade|local>
+										{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) !== 0}
+											{(details.percentage * 100).toFixed(1)} %
+										{/if}
+										{#if (+(details.percentage * 100).toFixed(2) - Math.round(details.percentage * 100)) === 0}
+											{(details.percentage * 100).toFixed(0)} %
+										{/if}
+									</div>
+								</div>
 							{/each}
 						</div>
 						{#if advancedMode}
@@ -553,16 +560,14 @@
 									<div class="row"><br></div>
 								{/if}
 								{#if name !== "Flour"}
-									<div class="row">
-										<div class="row">
-											<div class="tooltipArrowAbove">
-												<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
-												{#if !tooltipMode}
-													<div class="tooltiptextArrowAbove">
-														Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
-													</div>
-												{/if}
-											</div>
+									<div class="row" in:fly={{ x: 50 }} out:fly={{ x: 50 }}>
+										<div class="tooltipArrowAbove">
+											<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
+											{#if !tooltipMode}
+												<div class="tooltiptextArrowAbove">
+													Increase {name} by {details.percentage > .05 ? "1%" : "0.1%"}.
+												</div>
+											{/if}
 										</div>
 									</div>
 								{/if}
@@ -574,7 +579,7 @@
 				<div class="column"></div>
 			</div>
 			{#if advancedMode}
-				<div class="row center addIngredient">
+				<div class="row center addIngredient" in:scale out:scale>
 					<div class="tooltipArrowAbove">
 						<button class="transparentButton icon green" on:click={addIngredient}><FaPlus /></button>
 						{#if !tooltipMode}
@@ -634,7 +639,7 @@
 		<div class="row centerVertical">
 			<h4>Step-by-step Pizza Dough Instructions:</h4>
 			{#if advancedMode}
-				<div class="tooltipArrowAbove edit">
+				<div class="tooltipArrowAbove edit" in:scale out:scale>
 					<button class="transparentButton icon" on:click={editInstructions}><FaEdit /></button>
 					{#if !tooltipMode}
 						<div class="tooltiptextArrowAbove">
@@ -894,6 +899,17 @@
 		background-color: #006064;
 	}
 
+	.transition-container {
+		display: grid;
+		grid-template-rows: 1fr;
+		grid-template-columns: 1fr;
+	}
+
+	.transition-container > * {
+		grid-row: 1;
+		grid-column: 1;
+	}
+
 	/* tooltip related */
 	.tooltip {
 		position: relative;
@@ -996,6 +1012,5 @@
 		visibility: visible;
 		opacity: 1;
 	}
-
 
 </style>

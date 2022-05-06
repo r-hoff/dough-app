@@ -32,4 +32,10 @@ export let pizzaSizeW = writable(16);
 
 export let lastSelectionW = writable(16);
 
-export let mobileW = writable(false)
+export let mobileW = writable(false);
+
+export let showImageW = writable(false);
+
+export let imgSrcW = writable("");
+
+export let imageArrayW = writable([]);

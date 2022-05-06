@@ -2,12 +2,16 @@
 	import Swal from 'sweetalert2';
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
-    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW, mobileW, pizzaSizeW } from './stores';
+    import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW,
+		 mobileW, pizzaSizeW, showImageW, imgSrcW, imageArrayW } from './stores';
 	import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
+	import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
 	import numToWords from 'number-to-words/src/index.js';
 	const { toWords } = numToWords;
+	
+	import axios from 'axios';
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -44,6 +48,21 @@
 		pizzaSize = value;
 	});
 
+	let showImage;
+	showImageW.subscribe(value => {
+		showImage = value;
+	});
+
+	let imgSrc;
+	imgSrcW.subscribe(value => {
+		imgSrc = value;
+	});
+
+	let imageArray;
+	imageArrayW.subscribe(value => {
+		imageArray = value;
+	});
+
 	const Toast = Swal.mixin({
 		toast: true,
 		position: mobile? 'top': 'top-end',
@@ -65,8 +84,7 @@
 		Swal.fire({
 			title: "Edit Title",
 			input: "text",
-			showCancelButton: true,
-			cancelButtonText: "Cancel",
+			showCloseButton: true,
 			confirmButtonText: "Save",
 			inputValue: preEdit
 		}).then((edit) => {
@@ -82,6 +100,53 @@
 		})
 	}
 
+	function addImage() {
+		Swal.fire({
+			title: "Add Image",
+			text: "Search for an image to add to recipe:",
+			input: "text",
+			showCloseButton: true,
+			confirmButtonText: "Search"
+		}).then((search) => {
+			if (search.isConfirmed) {
+				let token = process.env.unsplash_token;
+				axios({
+					method: 'get',
+					headers: {
+						'Authorization': `Client-ID ${token}`
+					},
+					url: `https://api.unsplash.com/search/photos?query=${search.value}`
+				}).then((response) => {
+					let images = [];
+					for (const result of response.data.results) {
+						images.push(result.urls.thumb)
+					}
+					imageArrayW.set(images);
+					goto("/images");
+				})
+			}
+		})
+	}
+
+	function editImage() {
+		Swal.fire({
+			title: "Edit Image",
+			text: "Would you like to delete the image or start a new search?",
+			showCancelButton: true,
+			showCloseButton: true,
+			confirmButtonText: "Delete",
+			cancelButtonText: "New Search"
+		}).then((choice) => {
+			if (choice.isConfirmed) {
+				imgSrcW.set("");
+				showImageW.set(false)
+			}
+			if (choice.dismiss === "cancel") {
+				addImage();
+			}
+		})
+	}
+
 	function routeToHome() {
 		goto('/') 
 	}
@@ -93,8 +158,8 @@
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
 <div class="container">
-	<div class="navbar spaceBetween">
-		<div id="hide" class="navbarContainer spaceBetween">
+	<div id="hide" class="navbar spaceBetween">
+		<div class="navbarContainer spaceBetween">
 			<div class="tooltipArrowBelow">
 				<button class="transparentButton iconLarge" on:click={routeToHome}><FaArrowLeft /></button>
 				{#if !tooltipMode}
@@ -131,7 +196,26 @@
 		{#if servings === 1}
 			<div class="row center servings">Makes {toWords(servings)} {pizzaSize}" pizza.</div>
 		{/if}
-		<br>
+		<div class="addImage">
+			{#if !showImage}
+				<div id="addImage" class="row center">
+					<div class="tooltipArrowBelow">
+						<button class="transparentButton iconLarge green" on:click={addImage}><FaPlus /></button>
+						{#if !tooltipMode}
+							<div id="ttBack" class="tooltiptextArrowBelow">
+								Add image to recipe.
+							</div>
+						{/if}
+					</div>
+					<div>Add Image</div>
+				</div>
+			{/if}
+			{#if showImage}
+				<div class="row center">
+					<img src={imgSrc} alt="searchImage" on:click={editImage}>
+				</div>
+			{/if}
+		</div>
 		<h3 class="centerText setMargin">Ingredient Summary</h3>
 		<div class="row spaceEvenly">
 			<div class="column"></div>
@@ -171,7 +255,6 @@
 			<div class="column"></div>
 			<div class="column"></div>
 		</div>
-		<br>
 		<div class="row spaceBetween">
 			<div id="pad1" class="pad"></div>
 			<div class="column">
@@ -197,19 +280,21 @@
 		margin: auto;
 	}
 	@media print {
-		#ttPrint, #ttPrint, #ttEdit {
-			visibility: hidden;
-		}
 		#pad1, #pad2 {
 			padding: 0;
 		}
-		#hide {
+		#hide, #addImage, #ttPrint, #ttPrint, #ttEdit {
 			visibility: hidden;
+			height: 0;
 		}
 		#print {
 			height:100%; 
 			font-size: 18pt;
 		}
+	}
+	h4 {
+		margin-top: 1rem;
+		margin-bottom: 1rem;
 	}
 	.navbar {
 		position: -webkit-sticky; /* Safari */
@@ -225,27 +310,14 @@
 		flex-direction: row;
 		width: 100%;
 	}
-	.maxHalf {
-		width: 50%;
-	}
-	.rightText {
-		text-align: right;
-	}
-	.leftText {
-		text-align: left;
-	}
 	.centerText {
 		text-align: center;
-	}
-	.lightText {
-		font-size: smaller;
-		color: #757575;
 	}
 	.setMargin {
 		margin: .5em;
 	}
-	.marginBottom {
-		margin-bottom: .5em;
+	.addImage {
+		margin-top: .5em;
 	}
 	.center {
 		align-items: center;
@@ -253,9 +325,6 @@
 	}
 	.widthAll {
 		width: 100%;
-	}
-	.heightAll {
-		height: 100%;
 	}
 	.pad {
 		width: max-content;
@@ -268,9 +337,6 @@
 	}
 	.marginAuto {
 		margin: auto;
-	}
-	.flexEnd {
-		justify-content: flex-end;
 	}
 	hr {
 		width: 100%;
@@ -299,25 +365,12 @@
 	.spaceBetween {
 		justify-content: space-between;
 	}
-	.spaceAround {
-		justify-content: space-around;
-	}
-
-	.options {
-		background-color: #EEEEEE;
-		border-radius: 12px;
-	}
-
 	.iconLarge {
 		width: 36px;
 		height: 36px;
 	}
 	.iconLarge:hover {
 		transform: translateY(-0.1em);
-	}
-	.iconSmall {
-		width: 20px;
-		height: 20px;
 	}
 	button {
 		cursor: pointer;
@@ -326,130 +379,16 @@
 		border: none;
 		background-color: transparent;
 	}
-	.sliderOff {
-		width: 4em;
-		text-align: right;
-		background-color: #283593;
-		border-radius: 12px;
-	}
-	.sliderOn {
-		width: 4em;
-		text-align: left;
-		background-color: #BDBDBD;
-		border-radius: 12px;
-	}
-	.metricActive {
-		font-weight: bold;
-		background-color: white;
-		border-color: #283593;
-		border-radius: 12px;
-	}
-	.metric {
-		font-weight: bold;
-		color: #757575;
-		background-color: white;
-		border-color: #BDBDBD;
-		border-radius: 12px;
-	}
-	.advancedActive {
-		font-weight: bold;
-		background-color: white;
-		border-color: #283593;
-		border-radius: 12px;
-	}
-	.advanced {
-		font-weight: bold;
-		color: #757575;
-		background-color: white;
-		border-color: #BDBDBD;
-		border-radius: 12px;
-	}
 	.servings {
 		border: none;
 		font-size: 1.25em;
 		text-align: center; 
 	}
-	input {
-		border: none;
-		border-bottom: 1px solid #BDBDBD;
-	}
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-		-webkit-appearance: none;
-		margin: 0;
-	}
-	.printReset {
-		width: 10em;
-		border: 0;
-		background-color: #303F9F;
-		color: white;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-weight: bold;
-        box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
-	}
-	.printReset:hover {
-		background-color: #283593;
-	}
-	.printReset:active {
-		background-color: #1A237E;
+	.green {
+		color: #4CAF50;
 	}
 
 	/* tooltip related */
-	.tooltip {
-		position: relative;
-		display: inline-block;
-	}
-	.tooltip .tooltiptext {
-		opacity: 0;
-		transition: opacity .5s;
-		visibility: hidden;
-		background-color: #3F51B5;
-		font-size: small;
-		color: #FFFFFF;
-		text-align: left;
-		border-radius: 6px;
-		padding: 10px;
-		width: 225%;
-		/* Position the tooltip */
-		position: absolute;
-		z-index: 1;
-		bottom: 100%;
-		left: 50%;
-		margin-left: -50%;
-	}
-	.tooltip:hover .tooltiptext {
-		visibility: visible;
-		opacity: 1;
-	}
-
-	.tooltipSmall {
-		position: relative;
-		display: inline-block;
-	}
-	.tooltipSmall .tooltiptextSmall {
-		opacity: 0;
-		transition: opacity .5s;
-		visibility: hidden;
-		background-color: #3F51B5;
-		font-size: small;
-		color: #FFFFFF;
-		text-align: left;
-		border-radius: 6px;
-		padding: 10px;
-		width: 50%;
-		/* Position the tooltip */
-		position: absolute;
-		z-index: 1;
-		bottom: 100%;
-		left: 50%;
-		margin-left: -50%;
-	}
-	.tooltipSmall:hover .tooltiptextSmall {
-		visibility: visible;
-		opacity: 1;
-	}
-
 	.tooltipArrowBelow {
 		position: relative;
 		display: inline-block;
@@ -469,31 +408,6 @@
 		z-index: 1;
 	}
 	.tooltipArrowBelow:hover .tooltiptextArrowBelow {
-		visibility: visible;
-		opacity: 1;
-	}
-
-	.tooltipArrowAbove {
-		position: relative;
-		display: inline-block;
-	}
-	.tooltipArrowAbove .tooltiptextArrowAbove {
-		opacity: 0;
-		transition: opacity .5s;
-		visibility: hidden;
-		background-color: #3F51B5;
-		font-size: small;
-		color: #FFFFFF;
-		text-align: left;
-		border-radius: 6px;
-		padding: 10px;
-		width: 500%;
-		bottom: 100%;
-		left: 50%;
-		position: absolute;
-		z-index: 1;
-	}
-	.tooltipArrowAbove:hover .tooltiptextArrowAbove {
 		visibility: visible;
 		opacity: 1;
 	}

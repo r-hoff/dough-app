@@ -1,0 +1,4 @@
+steps:
+    - name: unsplash
+      env: # Set the secret as environment variable
+          unsplash_token: ${{ secrets.UNSPLASH_TOKEN }}
