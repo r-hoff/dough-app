@@ -525,7 +525,7 @@
 										<div class="row"><br></div>
 									{/if}
 									{#if name !== "Flour"}
-										<div class="row" in:fly={{ x: -50 }} out:fly={{ x: -50 }}>
+										<div class="row" in:fly|local={{ x: -50 }} out:fly|local={{ x: -50 }}>
 											<div class="tooltipArrowAbove">
 												<button class="transparentButton iconSmall" on:click={() => decIngredientPercentage(name)}><FaChevronLeft /></button>
 												{#if !tooltipMode}
@@ -560,7 +560,7 @@
 									<div class="row"><br></div>
 								{/if}
 								{#if name !== "Flour"}
-									<div class="row" in:fly={{ x: 50 }} out:fly={{ x: 50 }}>
+									<div class="row" in:fly|local={{ x: 50 }} out:fly|local={{ x: 50 }}>
 										<div class="tooltipArrowAbove">
 											<button class="transparentButton iconSmall" on:click={() => incIngredientPercentage(name)}><FaChevronRight /></button>
 											{#if !tooltipMode}
