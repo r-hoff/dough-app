@@ -486,31 +486,33 @@
 	</div>
 	<div class="row spaceEvenly ingOpContainer">
 		<div class="column ingredientsContainer">
-			<div class="row center">
-				<div>
-					<div class="tooltipArrowAbove">
-						<button class="transparentButton icon" on:click={importIngredients}><FaFileImport /></button>
-						{#if !tooltipMode}
-							<div class="tooltiptextArrowAbove">
-								<u>Import</u><br>
-								Import list of ingredients and measurements
-							</div>
-						{/if}
+			{#if advancedMode}
+				<div class="row center">
+					<div in:scale|local out:scale|local>
+						<div class="tooltipArrowAbove">
+							<button class="transparentButton icon" on:click={importIngredients}><FaFileImport /></button>
+							{#if !tooltipMode}
+								<div class="tooltiptextArrowAbove">
+									<u>Import</u><br>
+									Import list of ingredients and measurements
+								</div>
+							{/if}
+						</div>
+					</div>
+					<div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+					<div in:scale|local out:scale|local>
+						<div class="tooltipArrowAbove">
+							<button class="transparentButton icon" on:click={exportIngredients}><FaFileExport /></button>
+							{#if !tooltipMode}
+								<div class="tooltiptextArrowAbove">
+									<u>Export</u><br>
+									Save list of ingredients and measurements
+								</div>
+							{/if}
+						</div>
 					</div>
 				</div>
-				<div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
-				<div>
-					<div class="tooltipArrowAbove">
-						<button class="transparentButton icon" on:click={exportIngredients}><FaFileExport /></button>
-						{#if !tooltipMode}
-							<div class="tooltiptextArrowAbove">
-								<u>Export</u><br>
-								Save list of ingredients and measurements
-							</div>
-						{/if}
-					</div>
-				</div>
-			</div>
+			{/if}
 			<h3 class="centerText setMargin">Ingredient Summary</h3>
 			<div class="row spaceBetween">
 				<div class="column"></div>
