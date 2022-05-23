@@ -1,0 +1,80 @@
+diff --git a/node_modules/sweetalert2/src/scss/_core.scss b/node_modules/sweetalert2/src/scss/_core.scss
+index a5ea489..b196941 100644
+--- a/node_modules/sweetalert2/src/scss/_core.scss
++++ b/node_modules/sweetalert2/src/scss/_core.scss
+@@ -225,9 +225,12 @@
+     color: $swal2-confirm-button-color;
+     font-size: $swal2-confirm-button-font-size;
+ 
+-    &:focus {
+-      box-shadow: $swal2-confirm-button-focus-box-shadow;
+-    }
++    // edited this
++    font-weight: bold;
++
++    // &:focus {
++    //   box-shadow: $swal2-confirm-button-focus-box-shadow;
++    // }
+   }
+ 
+   &.swal2-deny {
+@@ -253,9 +256,12 @@
+     color: $swal2-cancel-button-color;
+     font-size: $swal2-cancel-button-font-size;
+ 
+-    &:focus {
+-      box-shadow: $swal2-cancel-button-focus-box-shadow;
+-    }
++    // edited this
++    font-weight: bold;
++
++    // &:focus {
++    //   box-shadow: $swal2-cancel-button-focus-box-shadow;
++    // }
+   }
+ 
+   &.swal2-default-outline {
+diff --git a/node_modules/sweetalert2/src/variables.scss b/node_modules/sweetalert2/src/variables.scss
+index 4a78c0f..6d4f25b 100644
+--- a/node_modules/sweetalert2/src/variables.scss
++++ b/node_modules/sweetalert2/src/variables.scss
+@@ -21,7 +21,7 @@ $swal2-hide-animation: swal2-hide .15s forwards !default;
+ $swal2-background: $swal2-white !default;
+ 
+ // TYPOGRAPHY
+-$swal2-font: inherit !default;
++$swal2-font: 'Quicksand', sans-serif !default; // edited this
+ $swal2-font-size: 1rem !default;
+ 
+ // BACKDROP
+@@ -88,7 +88,7 @@ $swal2-input-focus-outline: none !default;
+ $swal2-input-focus-box-shadow: inset 0 1px 1px rgba($swal2-black, .06), 0 0 0 3px $swal2-outline-color !default;
+ 
+ // TEXTAREA SPECIFIC VARIABLES
+-$swal2-textarea-height: 6.75em !default;
++$swal2-textarea-height: 50vh !default; //edited this
+ $swal2-textarea-padding: .75em !default;
+ 
+ // INPUT LABEL
+@@ -186,8 +186,8 @@ $swal2-button-focus-box-shadow: 0 0 0 3px $swal2-outline-color !default;
+ // CONFIRM BUTTON
+ $swal2-confirm-button-order: null !default;
+ $swal2-confirm-button-border: 0 !default;
+-$swal2-confirm-button-border-radius: .25em !default;
+-$swal2-confirm-button-background-color: #7066e0 !default;
++$swal2-confirm-button-border-radius: 6px !default; // edited this
++$swal2-confirm-button-background-color: #0097A7 !default; // edited this
+ $swal2-confirm-button-color: $swal2-white !default;
+ $swal2-confirm-button-font-size: 1em !default;
+ $swal2-confirm-button-focus-box-shadow: 0 0 0 3px rgba($swal2-confirm-button-background-color, .5) !default;
+@@ -204,8 +204,8 @@ $swal2-deny-button-focus-box-shadow: 0 0 0 3px rgba($swal2-deny-button-backgroun
+ // CANCEL BUTTON
+ $swal2-cancel-button-order: null !default;
+ $swal2-cancel-button-border: 0 !default;
+-$swal2-cancel-button-border-radius: .25em !default;
+-$swal2-cancel-button-background-color: #6e7881 !default;
++$swal2-cancel-button-border-radius: 6px !default; // edited this
++$swal2-cancel-button-background-color: #0097A7 !default; // edited this
+ $swal2-cancel-button-color: $swal2-white !default;
+ $swal2-cancel-button-font-size: 1em !default;
+ $swal2-cancel-button-focus-box-shadow: 0 0 0 3px rgba($swal2-cancel-button-background-color, .5) !default;
