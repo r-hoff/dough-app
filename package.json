@@ -21,6 +21,7 @@
 		"number-to-words": "^1.2.4",
 		"page": "^1.11.6",
 		"patch-package": "^6.4.7",
-		"svelte-icons": "^2.1.0"
+		"svelte-icons": "^2.1.0",
+		"sweetalert2": "^11.4.10"
 	}
 }
