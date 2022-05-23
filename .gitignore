@@ -72,3 +72,4 @@
 /node_modules/to-regex-range
 /node_modules/vite
 /node_modules/worktop
+.vercel

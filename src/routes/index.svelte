@@ -13,6 +13,8 @@
 	import FaBan from 'svelte-icons/fa/FaBan.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
 	import { fade, fly, scale } from 'svelte/transition';
+	import FaFileImport from 'svelte-icons/fa/FaFileImport.svelte'
+	import FaFileExport from 'svelte-icons/fa/FaFileExport.svelte'
 
 	let servings;
 	servingsW.subscribe(value => {
@@ -412,6 +414,14 @@
 		return Math.round(num*4)/4;
 	}
 
+	function exportIngredients() {
+		console.log(ingredients)
+	}
+
+	function importIngredients() {
+		console.log("not implemented")
+	}
+
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
 <svelte:window on:pointermove|once={testScreen}/>
@@ -476,6 +486,31 @@
 	</div>
 	<div class="row spaceEvenly ingOpContainer">
 		<div class="column ingredientsContainer">
+			<div class="row center">
+				<div>
+					<div class="tooltipArrowAbove">
+						<button class="transparentButton icon" on:click={importIngredients}><FaFileImport /></button>
+						{#if !tooltipMode}
+							<div class="tooltiptextArrowAbove">
+								<u>Import</u><br>
+								Import list of ingredients and measurements
+							</div>
+						{/if}
+					</div>
+				</div>
+				<div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+				<div>
+					<div class="tooltipArrowAbove">
+						<button class="transparentButton icon" on:click={exportIngredients}><FaFileExport /></button>
+						{#if !tooltipMode}
+							<div class="tooltiptextArrowAbove">
+								<u>Export</u><br>
+								Save list of ingredients and measurements
+							</div>
+						{/if}
+					</div>
+				</div>
+			</div>
 			<h3 class="centerText setMargin">Ingredient Summary</h3>
 			<div class="row spaceBetween">
 				<div class="column"></div>

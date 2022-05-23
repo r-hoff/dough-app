@@ -128,4 +128,28 @@
     .centerText {
 		text-align: center;
 	}
+
+		/* tooltip related */
+		.tooltipArrowBelow {
+		position: relative;
+		display: inline-block;
+	}
+	.tooltipArrowBelow .tooltiptextArrowBelow {
+		opacity: 0;
+		transition: opacity .5s;
+		visibility: hidden;
+		background-color: #616161;
+		font-size: small;
+		color: #FFFFFF;
+		text-align: left;
+		border-radius: 6px;
+		padding: 10px;
+		width: 300%;
+		position: absolute;
+		z-index: 1;
+	}
+	.tooltipArrowBelow:hover .tooltiptextArrowBelow {
+		visibility: visible;
+		opacity: 1;
+	}
 </style>

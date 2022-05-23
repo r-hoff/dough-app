@@ -109,21 +109,43 @@
 			confirmButtonText: "Search"
 		}).then((search) => {
 			if (search.isConfirmed) {
-				let token = process.env.UNSPLASH_TOKEN;
-				axios({
-					method: 'get',
-					headers: {
-						'Authorization': `Client-ID ${token}`
-					},
-					url: `https://api.unsplash.com/search/photos?query=${search.value}`
-				}).then((response) => {
-					let images = [];
-					for (const result of response.data.results) {
-						images.push(result.urls.thumb)
-					}
-					imageArrayW.set(images);
-					goto("/images");
-				})
+				if (search.value !== '') {
+					axios({
+						method: 'get',
+						headers: {
+							'Authorization': `Client-ID ${import.meta.env.VITE_UNSPLASH_TOKEN}`
+						},
+						url: `https://api.unsplash.com/search/photos?query=${search.value}`
+					}).then((response) => {
+						let images = [];
+						for (const result of response.data.results) {
+							images.push(result.urls.thumb)
+						}
+						imageArrayW.set(images);
+						goto("/images");
+					})
+
+					// for cs361 teammate integration
+					// axios({
+					// 	method: 'get',
+					// 	url: `http://127.0.0.1:5000/imageService/${search.value}`
+					// }).then((response) => {
+					// 	imageArrayW.set(response.data);
+					// 	goto("/images");
+					// })
+
+				} else {
+					Swal.fire({
+						title: "Error",
+						text: "Search keyword must not be empty, please try again.",
+						showCloseButton: true,
+						confirmButtonText: "Retry"
+					}).then((retry) => {
+						if (retry.isConfirmed) {
+							addImage()
+						}
+					})
+				}
 			}
 		})
 	}
