@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
     import { imgSrcW, imageArrayW, mobileW, showImageW, tooltipModeW } from './stores';
     import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte'
-    import Swal from 'sweetalert2';
+    import Swal from 'sweetalert2/dist/sweetalert2.js';
 	import 'sweetalert2/src/sweetalert2.scss';
 
     let mobile;

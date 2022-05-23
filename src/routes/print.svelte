@@ -1,5 +1,5 @@
 <script>
-	import Swal from 'sweetalert2';
+	import Swal from 'sweetalert2/dist/sweetalert2.js';
 	import 'sweetalert2/src/sweetalert2.scss';
 	import { goto } from '$app/navigation';
     import { ingredientsW, servingsW, recipeW, tooltipModeW, recipeTitleW,
