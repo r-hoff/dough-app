@@ -13,9 +13,8 @@
 	import FaBan from 'svelte-icons/fa/FaBan.svelte'
 	import FaTimes from 'svelte-icons/fa/FaTimes.svelte'
 	import { fade, fly, scale } from 'svelte/transition';
-	import FaFileImport from 'svelte-icons/fa/FaFileImport.svelte'
-	import FaFileExport from 'svelte-icons/fa/FaFileExport.svelte'
 
+	// sets variables from stores.js for shared use
 	let servings;
 	servingsW.subscribe(value => {
 		servings = value;
@@ -61,16 +60,156 @@
 		mobile = value;
 	});
 
+	// set default Toast notifications
+	let Toast = Swal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 2000
+	})
+	let ToastCountdown = Swal.mixin({
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: true,
+		confirmButtonText: "Undo",
+		showCancelButton: true,
+		cancelButtonText: "Dismiss",
+		timer: 2000,
+		timerProgressBar: true,
+		reverseButtons: true,
+		didOpen: (toast) => {
+			toast.addEventListener('mouseenter', Swal.stopTimer)
+			toast.addEventListener('mouseleave', Swal.resumeTimer)
+		}
+	})
+
+	// detects mobile device/screen dimensions and makes viewing adjustments
+	function detectMobile() {
+		let modified = false;
+		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
+			if (!mobile) {
+				mobileW.set(true);
+				tooltipModeW.set(true);
+				modified = true;
+			}
+		} else {
+			if (mobile) {
+				mobileW.set(false);
+				tooltipModeW.set(true);
+				modified = true;
+			}
+		}
+
+		// if a change was made, update positions of toast notifications based on device/screen size
+		if (modified) {
+			if (mobile) {
+				Toast = Swal.mixin({
+					toast: true,
+					position: 'top',
+					showConfirmButton: false,
+					timer: 2000
+				})
+				ToastCountdown = Swal.mixin({
+					toast: true,
+					position: 'top',
+					showConfirmButton: true,
+					confirmButtonText: "Undo",
+					showCancelButton: true,
+					cancelButtonText: "Dismiss",
+					timer: 2000,
+					timerProgressBar: true,
+					reverseButtons: true,
+					didOpen: (toast) => {
+						toast.addEventListener('mouseenter', Swal.stopTimer)
+						toast.addEventListener('mouseleave', Swal.resumeTimer)
+					}
+				})
+			} else {
+				Toast = Swal.mixin({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 2000
+				})
+				ToastCountdown = Swal.mixin({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: true,
+					confirmButtonText: "Undo",
+					showCancelButton: true,
+					cancelButtonText: "Dismiss",
+					timer: 2000,
+					timerProgressBar: true,
+					reverseButtons: true,
+					didOpen: (toast) => {
+						toast.addEventListener('mouseenter', Swal.stopTimer)
+						toast.addEventListener('mouseleave', Swal.resumeTimer)
+					}
+				})
+			}
+		}
+	}
+
+	function dismissWelcome() {
+		detectMobile();
+		showWelcomeMessageW.update(value => !value);
+		ToastCountdown.fire({
+			icon: 'info',
+			title: 'Thanks for using Dough Planner!'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				showWelcomeMessageW.update(value => !value);
+			}
+		})
+	}
+
+	function toggleTooltipMode() {
+		if (mobile) {
+			Toast.fire({
+				icon: 'info',
+				title: 'Tooltips only available on desktop'
+			})
+		} else {
+			if (tooltipMode) {
+				tooltipModeW.update(value => !value);
+				Toast.fire({
+					icon: 'info',
+					title: 'Tooltips enabled'
+				});
+			} else {
+				tooltipModeW.update(value => !value);
+				Toast.fire({
+					icon: 'info',
+					title: 'Tooltips disabled'
+				});
+			}
+		}
+	}
+
+	function toggleAdvancedMode() {
+		if (advancedMode) {
+			advancedModeW.update(value => !value);
+			Toast.fire({
+				icon: 'info',
+				title: 'Pizzaiolo Mode disabled'
+			});
+		} else {
+			advancedModeW.update(value => !value);
+			Toast.fire({
+				icon: 'info',
+				title: 'Pizzaiolo Mode enabled'
+			});
+		}
+	}
+
 	function incServings() {
 		servingsW.update(value => value + 1);
-
 		recalcIngredients();
 	}
 
 	function decServings() {
 		if (servings > 1) {
 			servingsW.update(value => value - 1);
-
 			recalcIngredients();
 		} else {
 			Toast.fire({
@@ -95,7 +234,6 @@
 
 	function decIngredientPercentage(ingredient) {
 		let increment = 0.001;
-
 		if (ingredients[ingredient].percentage - 0.01 >= .05) {
 			increment = 0.01;
 		}
@@ -108,7 +246,6 @@
 
 	function incIngredientPercentage(ingredient) {
 		let increment = 0.001;
-
 		if (ingredients[ingredient].percentage >= .05) {
 			increment = 0.01;
 		}
@@ -138,7 +275,6 @@
 		let preEdit = recipeString();
 		Swal.fire({
 			title: "Edit Instructions",
-			text: "Enter instructions below",
 			input: "textarea",
 			showCloseButton: true,
 			confirmButtonText: "Save",
@@ -255,7 +391,12 @@
 						})
 					}
 					if(measurement.isConfirmed) {
-						ingredients[newIngredientName] = {base: measurement.value / servings, measurement: parseInt(measurement.value), percentage: measurement.value / ingredients.Flour.measurement, default: false};
+						ingredients[newIngredientName] = {
+							base: measurement.value / servings, 
+							measurement: parseInt(measurement.value), 
+							percentage: measurement.value / ingredients.Flour.measurement, 
+							default: false
+						};
 						Toast.fire({
 							icon: 'success',
 							title: `${newIngredientName} was added successfully!`
@@ -275,10 +416,8 @@
 			cancelButtonText: "No"
 		}).then((value) => {
 			if (value.isConfirmed) {
-				// delete ingredient and update ingredients
 				delete ingredients[ingredient];
 				ingredientsW.set(ingredients);
-
 				Toast.fire({
 					icon: "success",
 					title: `Deleted ${ingredient} from ingredients`
@@ -287,113 +426,7 @@
 		})
 	}
 
-	let Toast = Swal.mixin({
-		toast: true,
-		position: 'top-end',
-		showConfirmButton: false,
-		timer: 2000
-	})
-
-	let ToastCountdown = Swal.mixin({
-		toast: true,
-		position: 'top-end',
-		showConfirmButton: true,
-		confirmButtonText: "Undo",
-		showCancelButton: true,
-		cancelButtonText: "Dismiss",
-		timer: 2000,
-		timerProgressBar: true,
-		reverseButtons: true,
-		didOpen: (toast) => {
-			toast.addEventListener('mouseenter', Swal.stopTimer)
-			toast.addEventListener('mouseleave', Swal.resumeTimer)
-		}
-	})
-
-	function testScreen() {
-		if (window.matchMedia("only screen and (max-width: 760px)").matches) {
-			mobileW.set(true)
-			tooltipModeW.set(true);
-
-			Toast = Swal.mixin({
-				toast: true,
-				position: 'top',
-				showConfirmButton: false,
-				timer: 2000
-			})
-
-			ToastCountdown = Swal.mixin({
-				toast: true,
-				position: 'top',
-				showConfirmButton: true,
-				confirmButtonText: "Undo",
-				showCancelButton: true,
-				cancelButtonText: "Dismiss",
-				timer: 2000,
-				timerProgressBar: true,
-				reverseButtons: true,
-				didOpen: (toast) => {
-					toast.addEventListener('mouseenter', Swal.stopTimer)
-					toast.addEventListener('mouseleave', Swal.resumeTimer)
-				}
-			})
-		}
-	}
-
-
-	function dismissWelcome() {
-		testScreen();
-		showWelcomeMessageW.update(value => !value);
-		ToastCountdown.fire({
-			icon: 'info',
-			title: 'Thanks for using Dough Planner!'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				showWelcomeMessageW.update(value => !value);
-			}
-		})
-	}
-
-	function toggleTooltipMode() {
-		if (mobile) {
-			Toast.fire({
-				icon: 'info',
-				title: 'Tooltips only available on desktop'
-			})
-		} else {
-			if (tooltipMode) {
-				tooltipModeW.update(value => !value);
-				Toast.fire({
-					icon: 'info',
-					title: 'Tooltips enabled'
-				});
-			} else {
-				tooltipModeW.update(value => !value);
-				Toast.fire({
-					icon: 'info',
-					title: 'Tooltips disabled'
-				});
-			}
-			
-		}
-	}
-
-	function toggleAdvancedMode() {
-		if (advancedMode) {
-			advancedModeW.update(value => !value);
-			Toast.fire({
-				icon: 'info',
-				title: 'Pizzaiolo Mode disabled'
-			});
-		} else {
-			advancedModeW.update(value => !value);
-			Toast.fire({
-				icon: 'info',
-				title: 'Pizzaiolo Mode enabled'
-			});
-		}
-	}
-
+	// scales and updates ingredients for different pizza size selections
 	function scaleIngredients(size) {
 		pizzaSizeW.set(size);
 
@@ -410,21 +443,14 @@
 		lastSelectionW.set(size);
 	}
 
+	// rounds the provided number to the nearest .25
 	function roundQtr(num) {
 		return Math.round(num*4)/4;
 	}
 
-	function exportIngredients() {
-		console.log(ingredients)
-	}
-
-	function importIngredients() {
-		console.log("not implemented")
-	}
-
 </script>
 <link href="https://fonts.googleapis.com/css?family=Quicksand:300,500" rel="stylesheet">
-<svelte:window on:pointermove|once={testScreen}/>
+<svelte:window on:pointermove|once={detectMobile} on:resize={detectMobile} />
 <div class="container">
 	<div class="column navbar">
 		<h1 class="widthAll centerText marginAuto title">Pizza Dough Planner</h1>
@@ -438,9 +464,9 @@
 			</div>
 			<div class="row">
 				<div class="marginBottom">
-					This is the second official release of the application. All features are now implemented. Pizzaiolo Mode, ingredient
-					adjustment/addition/deletion, and print preview are all available. Pizza dough calculations are made based on number 
-					of servings, which can be adjusted with the up/down arrows below. If bugs are encountered, feel free to 
+					Pizza dough calculations are based on number of servings, which can be adjusted with the up/down arrows below.
+					Turn on Pizzaiolo Mode if you wish to make modifications to the recipe or would like to add new ingredients.
+					If bugs are encountered, feel free to 
 					<a href="mailto:hoffr@oregonstate.edu">report</a>.
 				</div>
 			</div>
@@ -486,33 +512,6 @@
 	</div>
 	<div class="row spaceEvenly ingOpContainer">
 		<div class="column ingredientsContainer">
-			{#if advancedMode}
-				<div class="row center">
-					<div in:scale|local out:scale|local>
-						<div class="tooltipArrowAbove">
-							<button class="transparentButton icon" on:click={importIngredients}><FaFileImport /></button>
-							{#if !tooltipMode}
-								<div class="tooltiptextArrowAbove">
-									<u>Import</u><br>
-									Import list of ingredients and measurements
-								</div>
-							{/if}
-						</div>
-					</div>
-					<div>&nbsp;&nbsp;&nbsp;&nbsp;</div>
-					<div in:scale|local out:scale|local>
-						<div class="tooltipArrowAbove">
-							<button class="transparentButton icon" on:click={exportIngredients}><FaFileExport /></button>
-							{#if !tooltipMode}
-								<div class="tooltiptextArrowAbove">
-									<u>Export</u><br>
-									Save list of ingredients and measurements
-								</div>
-							{/if}
-						</div>
-					</div>
-				</div>
-			{/if}
 			<h3 class="centerText setMargin">Ingredient Summary</h3>
 			<div class="row spaceBetween">
 				<div class="column"></div>
@@ -629,7 +628,10 @@
 					&nbsp;&nbsp;Add Ingredient
 				</div>
 				<br>
-				<div class="centerText lightText">Unsure on how modifying ingredients will affect your dough? <a target="_blank" href="http://www.thehomepizzeria.com/pizza-dough/ingredients/#">Read more here</a></div>
+				<div class="centerText lightText">
+					Unsure on how modifying ingredients will affect your dough? 
+					<a target="_blank" href="http://www.thehomepizzeria.com/pizza-dough/ingredients/#">Read more here</a>
+				</div>
 			{/if}
 		</div>
 		<div class="column optionsContainer">
@@ -716,7 +718,6 @@
 			</div>
 	</div>
 </div>
-
 <style>
 	* {
 		font-family: 'Quicksand', sans-serif;
@@ -790,19 +791,18 @@
 		width: 100%;
 	}
 	.title {
-		padding-top: .75em;
-		padding-bottom: .75em;
+		padding-top: .5em;
+		padding-bottom: .5em;
 		font-size: 2.5vmax;
 	}
 	.navbar {
-		position: -webkit-sticky; /* Safari */
+		position: -webkit-sticky;
 		position: sticky;
 		top: 0;
 		background-color: white;
 		z-index: 1;
 		width: 100%;
 	}
-
 	.marginAuto {
 		margin: auto;
 	}
@@ -916,7 +916,6 @@
 		width: 2em;
 		text-align: center; 
 	}
-
 	.styledButton {
 		height: 100%;
 		max-width: 75%;
@@ -935,13 +934,11 @@
 	.styledButton:active {
 		background-color: #006064;
 	}
-
 	.transition-container {
 		display: grid;
 		grid-template-rows: 1fr;
 		grid-template-columns: 1fr;
 	}
-
 	.transition-container > * {
 		grid-row: 1;
 		grid-column: 1;
@@ -963,7 +960,6 @@
 		border-radius: 6px;
 		padding: 10px;
 		width: 150%;
-		/* Position the tooltip */
 		position: absolute;
 		z-index: 1;
 		bottom: 100%;
@@ -974,7 +970,6 @@
 		visibility: visible;
 		opacity: 1;
 	}
-
 	.tooltipSmall {
 		position: relative;
 		display: inline-block;
@@ -990,7 +985,6 @@
 		border-radius: 6px;
 		padding: 10px;
 		width: 50%;
-		/* Position the tooltip */
 		position: absolute;
 		z-index: 1;
 		bottom: 100%;
@@ -1001,7 +995,6 @@
 		visibility: visible;
 		opacity: 1;
 	}
-
 	.tooltipArrowBelow {
 		position: relative;
 		display: inline-block;
@@ -1024,7 +1017,6 @@
 		visibility: visible;
 		opacity: 1;
 	}
-
 	.tooltipArrowAbove {
 		position: relative;
 		display: inline-block;
@@ -1049,5 +1041,4 @@
 		visibility: visible;
 		opacity: 1;
 	}
-
 </style>

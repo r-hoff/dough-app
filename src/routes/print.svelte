@@ -8,11 +8,11 @@
 	import FaPrint from 'svelte-icons/fa/FaPrint.svelte'
 	import FaEdit from 'svelte-icons/fa/FaEdit.svelte'
 	import FaPlus from 'svelte-icons/fa/FaPlus.svelte'
+	import axios from 'axios';
 	import numToWords from 'number-to-words/src/index.js';
 	const { toWords } = numToWords;
-	
-	import axios from 'axios';
 
+	// sets variables from stores.js for shared use
 	let servings;
 	servingsW.subscribe(value => {
 		servings = value;
@@ -70,6 +70,12 @@
 		timer: 2000
 	})
 
+	// rounds the provided number to the nearest .25
+	function roundQtr(num) {
+		return Math.round(num*4)/4;
+	}
+
+	// calculates and returns the total weight of all recipe ingredients
 	function calcTotal() {
 		let total= 0;
 		const ingredientList = Object.keys(ingredients);
@@ -100,13 +106,19 @@
 		})
 	}
 
+	// add image to recipe from keyword search
 	function addImage() {
 		Swal.fire({
 			title: "Add Image",
 			text: "Search for an image to add to recipe:",
 			input: "text",
 			showCloseButton: true,
-			confirmButtonText: "Search"
+			confirmButtonText: "Search",
+			inputValidator: (search) => {
+				if (!search) {
+					return 'Please enter a search keyword or phrase'
+				}
+			}
 		}).then((search) => {
 			if (search.isConfirmed) {
 				if (search.value !== '') {
@@ -124,32 +136,12 @@
 						imageArrayW.set(images);
 						goto("/images");
 					})
-
-					// for cs361 teammate integration
-					// axios({
-					// 	method: 'get',
-					// 	url: `http://127.0.0.1:5000/imageService/${search.value}`
-					// }).then((response) => {
-					// 	imageArrayW.set(response.data);
-					// 	goto("/images");
-					// })
-
-				} else {
-					Swal.fire({
-						title: "Error",
-						text: "Search keyword must not be empty, please try again.",
-						showCloseButton: true,
-						confirmButtonText: "Retry"
-					}).then((retry) => {
-						if (retry.isConfirmed) {
-							addImage()
-						}
-					})
 				}
 			}
 		})
 	}
 
+	// edit the currently selected image
 	function editImage() {
 		Swal.fire({
 			title: "Edit Image",
@@ -169,12 +161,8 @@
 		})
 	}
 
-	function routeToHome() {
+	function routeHome() {
 		goto('/') 
-	}
-
-	function roundQtr(num) {
-		return Math.round(num*4)/4;
 	}
 
 </script>
@@ -182,26 +170,26 @@
 <div class="container">
 	<div id="hide" class="navbar spaceBetween">
 		<div class="navbarContainer spaceBetween">
-			<div class="tooltipArrowBelow">
-				<button class="transparentButton iconLarge" on:click={routeToHome}><FaArrowLeft /></button>
+			<div class="tooltipRight">
+				<button class="transparentButton iconLarge" on:click={routeHome}><FaArrowLeft /></button>
 				{#if !tooltipMode}
-					<div id="ttBack" class="tooltiptextArrowBelow">
-						Navigate back to planner.
+					<div id="ttBack" class="tooltiptextRight">
+						Navigate back to planner
 					</div>
 				{/if}
 			</div>
-			<div class="tooltipArrowBelow">
+			<div class="tooltipRight">
 				<button class="transparentButton iconLarge" on:click={editTitle}><FaEdit /></button>
 				{#if !tooltipMode}
-					<div id="ttEdit" class="tooltiptextArrowBelow">
-						Edit recipe title.
+					<div id="ttEdit" class="tooltiptextRight">
+						Edit recipe title
 					</div>
 				{/if}
 			</div>
-			<div class="tooltipArrowBelow">
+			<div class="tooltipLeft">
 				<button class="transparentButton iconLarge" on:click={() => window.print()}><FaPrint /></button>
 				{#if !tooltipMode}
-					<div id="ttPrint" class="tooltiptextArrowBelow">
+					<div id="ttPrint" class="tooltiptextLeft">
 						Print recipe!
 					</div>
 				{/if}
@@ -221,11 +209,11 @@
 		<div class="addImage">
 			{#if !showImage}
 				<div id="addImage" class="row center">
-					<div class="tooltipArrowBelow">
+					<div class="tooltipRight">
 						<button class="transparentButton iconLarge green" on:click={addImage}><FaPlus /></button>
 						{#if !tooltipMode}
-							<div id="ttBack" class="tooltiptextArrowBelow">
-								Add image to recipe.
+							<div id="ttBack" class="tooltiptextRight">
+								Add image to recipe
 							</div>
 						{/if}
 					</div>
@@ -319,7 +307,7 @@
 		margin-bottom: 1rem;
 	}
 	.navbar {
-		position: -webkit-sticky; /* Safari */
+		position: -webkit-sticky;
 		position: sticky;
 		top: 0;
 		background-color: white;
@@ -353,6 +341,9 @@
 		min-width: 5%;
 		max-width: 25%;
 		flex-shrink: 1;
+	}
+	img {
+		cursor: pointer;
 	}
 	.title {
 		padding: .5em;
@@ -411,11 +402,11 @@
 	}
 
 	/* tooltip related */
-	.tooltipArrowBelow {
+	.tooltipRight {
 		position: relative;
 		display: inline-block;
 	}
-	.tooltipArrowBelow .tooltiptextArrowBelow {
+	.tooltipRight .tooltiptextRight {
 		opacity: 0;
 		transition: opacity .5s;
 		visibility: hidden;
@@ -429,7 +420,31 @@
 		position: absolute;
 		z-index: 1;
 	}
-	.tooltipArrowBelow:hover .tooltiptextArrowBelow {
+	.tooltipRight:hover .tooltiptextRight {
+		visibility: visible;
+		opacity: 1;
+	}
+
+	.tooltipLeft {
+		position: relative;
+		display: inline-block;
+	}
+	.tooltipLeft .tooltiptextLeft {
+		opacity: 0;
+		transition: opacity .5s;
+		visibility: hidden;
+		background-color: #616161;
+		font-size: small;
+		color: #FFFFFF;
+		text-align: left;
+		border-radius: 6px;
+		padding: 10px;
+		width: 300%;
+		position: absolute;
+		z-index: 1;
+		margin-left: -250%;
+	}
+	.tooltipLeft:hover .tooltiptextLeft {
 		visibility: visible;
 		opacity: 1;
 	}

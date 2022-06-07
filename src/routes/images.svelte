@@ -5,6 +5,7 @@
     import Swal from 'sweetalert2';
 	import 'sweetalert2/src/sweetalert2.scss';
 
+	// sets variables from stores.js for shared use
     let mobile;
 	mobileW.subscribe(value => {
 		mobile = value;
@@ -27,10 +28,11 @@
 		timer: 2000
 	})
 
+	// select a single image for display on print page
     function selectImage(url) {
         Swal.fire({
-			title: "Select Image",
-            text: "Would you like to use this image?",
+			title: "Add image to recipe?",
+			imageUrl: url,
 			showCancelButton: true,
 			cancelButtonText: "No",
 			confirmButtonText: "Yes"
@@ -62,7 +64,7 @@
 				<button class="transparentButton iconLarge" on:click={routeBack}><FaArrowLeft /></button>
 				{#if !tooltipMode}
 					<div id="ttBack" class="tooltiptextArrowBelow">
-						Navigate back to print preview.
+						Back to print preview
 					</div>
 				{/if}
 			</div>
@@ -81,7 +83,7 @@
 		font-family: 'Quicksand', sans-serif;
 	}
     .navbar {
-		position: -webkit-sticky; /* Safari */
+		position: -webkit-sticky;
 		position: sticky;
 		top: 0;
 		background-color: white;
@@ -115,6 +117,7 @@
     .iconLarge {
 		width: 36px;
 		height: 36px;
+		cursor: pointer;
 	}
 	.iconLarge:hover {
 		transform: translateY(-0.1em);
@@ -123,14 +126,16 @@
         display: block;
         margin-left: auto;
         margin-right: auto;
-        width: 50%;
     }
     .centerText {
 		text-align: center;
 	}
+	img {
+		cursor: pointer;
+	}
 
-		/* tooltip related */
-		.tooltipArrowBelow {
+	/* tooltip related */
+	.tooltipArrowBelow {
 		position: relative;
 		display: inline-block;
 	}
